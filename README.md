@@ -18,4 +18,9 @@ To install the *bbreg* package from this repository, just run the command:
 devtools::install_github("vpnsctl/bbreg/bbreg")
 ```
 
+To install the *bbreg* package from this repository **with vignettes**, run the command:
+```{r}
+install_github("foo/bar", build_vignettes = TRUE)
+```
+
 This repository will always contain the most recent version of the *bbreg* package.
