@@ -31,6 +31,14 @@ was developed in <https://www.tandfonline.com/doi/abs/10.1080/00949655.2017.1350
 
 Check for updates of this vignette on <https://rpubs.com/alexandrebsimas/intro-bbreg>
 
+## Installing the CRAN version
+
+To install the CRAN version of the *bbreg* package, run:
+
+```{r eval=FALSE}
+install.packages("bbreg")
+```
+
 ## Latest version
 
 The latest version of the *bbreg* package can be installed from its *github* repository by
