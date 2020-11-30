@@ -9,3 +9,13 @@ was developed in <https://www.tandfonline.com/doi/abs/10.1080/00949655.2017.1350
 ## Vignette
 
 The *bbreg* package has a vignette. Check the most recent version of the vignette at <https://rpubs.com/alexandrebsimas/intro-bbreg>
+
+## Installing the *bbreg* package from this repository:
+
+To install the *bbreg* package from this repository, just run the command:
+
+```{r}
+devtools::install_github("vpnsctl/bbreg/bbreg")
+```
+
+This repository will always contain the most recent version of the *bbreg* package.
