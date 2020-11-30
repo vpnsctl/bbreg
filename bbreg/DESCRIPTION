@@ -2,7 +2,7 @@ Package: bbreg
 Type: Package
 Title: Bessel and Beta Regressions via Expectation-Maximization
         Algorithm for Continuous Bounded Data
-Version: 2.0.1
+Version: 2.0.2
 Authors@R: 
     c(person(given = "Vinicius",
              family = "Mayrink",

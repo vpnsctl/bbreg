@@ -77,7 +77,7 @@ The terms "x_i^T" and "v_i^T" represent, respectively, the i-th row of the matri
 
 This package implements an Expectation Maximization (EM) algorithm to fit the bessel regression. The full EM approach proposed in \emph{Barreto-Souza and Simas (2017)} for the beta
 regression is also available here. Fitting the beta regression via EM-algorithm is a major difference between the present package \pkg{bbreg} and the
-well known \code{\link[betareg]{betareg}} created by Alexandre B. Simas and currently maintained by Achim Zeileis. The estimation procedure on the betareg packages
+well known \code{betareg} created by Alexandre B. Simas and currently maintained by Achim Zeileis. The estimation procedure on the betareg packages
 is given by maximizing the beta model likelihood via \code{\link[stats]{optim}}.
 In terms of initial values, \pkg{bbreg} uses quasi-likelihood estimates as the starting points for
 the EM-algorithms. The formulation of the target model also has the same structure as in the standard functions \code{lm}, \code{glm} and \pkg{betareg},
