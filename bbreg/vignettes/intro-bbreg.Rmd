@@ -31,6 +31,15 @@ was developed in <https://www.tandfonline.com/doi/abs/10.1080/00949655.2017.1350
 
 Check for updates of this vignette on <https://rpubs.com/alexandrebsimas/intro-bbreg>
 
+## Latest version
+
+The latest version of the *bbreg* package can be installed from its *github* repository by
+using the command:
+
+```{r eval=FALSE}
+devtools::install_github("vpnsctl/bbreg/bbreg")
+```
+
 # Choosing between bessel regression and beta regression
 
 There are several manners to choose between bessel and beta regression, most of them using diagnostic analysis. 
