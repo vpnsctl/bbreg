@@ -38,7 +38,6 @@ plot.bbreg = function(x,which = c(1,2,3,4), ask = TRUE, main = "", qqline = TRUE
     ask = FALSE
   }
   grDevices::devAskNewPage(ask = ask)
-  pch = 19
   res = x$residuals
   call_mod = deparse(x$call)
   name = x$modelname
@@ -51,7 +50,7 @@ plot.bbreg = function(x,which = c(1,2,3,4), ask = TRUE, main = "", qqline = TRUE
     ylab = residualname
     xlab  = paste0("Index\n bbreg(",call_mod,")")
     title_1 = paste0(residualname," vs Index - ",name)
-    graphics::plot(res, xlab= xlab, ylab=ylab, font.main = 1, main = main)
+    graphics::plot(res, xlab= xlab, ylab=ylab, main = main, ...)
     graphics::abline(0,0, lty=3)
     graphics::mtext(title_1, side = 3)
   }
@@ -63,18 +62,14 @@ plot.bbreg = function(x,which = c(1,2,3,4), ask = TRUE, main = "", qqline = TRUE
     residualname = paste0(toupper(substring(x$residualname,1,1)),substring(x$residualname,2))
     ylim = range(res,env)
     xlim = c(stats::qnorm(0.5/n),stats::qnorm(1-0.5/n))
-    ylab = paste0(residualname," residuals")
     xlab = paste0("Theoretical quantiles\n bbreg(",call_mod,")")
-    cex.lab = 1
-    cex.axis = 1
+    ylab = paste0(residualname," residuals")
     if(is.null(env)==FALSE){
       title_2 = paste0("Q-Q Plot with simulated envelopes - ",name)
     } else{
       title_2 = paste0("Q-Q Plot - ", name)
     }
-    RR = stats::qqnorm(res,xlab=xlab,ylab=ylab,xlim=xlim,ylim=ylim,
-                       pch="", cex.lab=cex.lab,cex.axis=cex.axis,
-                       font.main = 1,main=main)
+    RR = stats::qqnorm(res,xlab=xlab,ylab=ylab,xlim=xlim,ylim=ylim,main=main, ...)
     if(is.null(env)==FALSE){
       aux = sort(RR$x)
       graphics::lines(aux,env[1,],col=grDevices::rgb(0.7,0.7,0.7))
@@ -86,7 +81,7 @@ plot.bbreg = function(x,which = c(1,2,3,4), ask = TRUE, main = "", qqline = TRUE
         stats::qqline(res, lty = 3)        
       }
     }
-    graphics::points(RR$x,RR$y,pch=pch)
+    graphics::points(RR$x,RR$y,...)
     graphics::mtext(title_2, side = 3)
   }
 
@@ -98,7 +93,7 @@ plot.bbreg = function(x,which = c(1,2,3,4), ask = TRUE, main = "", qqline = TRUE
     title_3 = paste0("Response vs Fitted means - ",name)
     ylab = "Response"
     xlab  = paste0("Predicted values\n bbreg(",call_mod,")")
-    graphics::plot(mu_est, obs, xlab = xlab, ylab = ylab,main=main)
+    graphics::plot(mu_est, obs, xlab = xlab, ylab = ylab,main=main, ...)
     graphics::abline(0,1, lty=3)
     graphics::mtext(title_3, side = 3)
   }
@@ -110,7 +105,7 @@ plot.bbreg = function(x,which = c(1,2,3,4), ask = TRUE, main = "", qqline = TRUE
     title_4 = paste0(residualname," vs Fitted means - ",name)
     ylab = paste0(residualname," residuals")
     xlab  = paste0("Predicted values\n bbreg(",call_mod,")")
-    graphics::plot(mu_est, res, xlab = xlab, ylab = ylab,main=main)
+    graphics::plot(mu_est, res, xlab = xlab, ylab = ylab,main=main, ...)
     graphics::abline(0,0, lty=3)
     graphics::mtext(title_4, side = 3)
   }

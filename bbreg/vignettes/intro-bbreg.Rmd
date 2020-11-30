@@ -44,7 +44,7 @@ devtools::install_github("vpnsctl/bbreg/bbreg")
 To install the *bbreg* package from its *github* repository **with vignette**, run the command:
 
 ```{r eval=FALSE}
-install_github("vpnsctl/bbreg/bbreg", build_vignettes = TRUE)
+devtools::install_github("vpnsctl/bbreg/bbreg", build_vignettes = TRUE)
 ```
 
 # Choosing between bessel regression and beta regression
