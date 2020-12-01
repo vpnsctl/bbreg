@@ -3,7 +3,7 @@
 [![](https://www.r-pkg.org/badges/version/bbreg?color=green)](https://cran.r-project.org/package=bbreg)
 [![](https://img.shields.io/badge/devel%20version-2.0.2-blue.svg)](https://github.com/vpnsctl/bbreg/main)
 [![](http://cranlogs.r-pkg.org/badges/grand-total/bbreg?color=black)](https://cran.r-project.org/package=bbreg)
-[![](http://cranlogs.r-pkg.org/badges/last-month/bbreg?color=green)](https://cran.r-project.org/package=bbreg)
+[![](http://cranlogs.r-pkg.org/badges/last-month/bbreg?color=orange)](https://cran.r-project.org/package=bbreg)
 
 ---
 
