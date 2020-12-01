@@ -1,5 +1,12 @@
 # The *bbreg* package
 
+[![](https://www.r-pkg.org/badges/version/bbreg?color=green)](https://cran.r-project.org/package=bbreg)
+[![](https://img.shields.io/badge/devel%20version-2.0.2-blue.svg)](https://github.com/vpnsctl/bbreg/main)
+[![](http://cranlogs.r-pkg.org/badges/grand-total/bbreg?color=black)](https://cran.r-project.org/package=bbreg)
+[![](http://cranlogs.r-pkg.org/badges/last-month/bbreg?color=green)](https://cran.r-project.org/package=bbreg)
+
+---
+
 The *bbreg* package deals with regression models with response variables being continuous
 and bounded. It currently provides implementation of two regression models: beta
 regression <https://www.tandfonline.com/doi/abs/10.1080/0266476042000214501> and bessel regression <https://arxiv.org/abs/2003.05157>. For both of these models, the estimation is 
