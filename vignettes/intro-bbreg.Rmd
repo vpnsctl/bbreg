@@ -27,11 +27,11 @@ regression <https://www.tandfonline.com/doi/abs/10.1080/0266476042000214501> and
 done with the EM-algorithm. The EM-algorithm approach for beta regression
 was developed in <https://www.tandfonline.com/doi/abs/10.1080/00949655.2017.1350679>.
 
-## Updates
+## Updates of this *vignette*
 
 Check for updates of this vignette on <https://rpubs.com/alexandrebsimas/intro-bbreg>
 
-## Installing the CRAN version
+## Installing the CRAN version of *bbreg*
 
 To install the CRAN version of the *bbreg* package, run:
 
@@ -39,7 +39,7 @@ To install the CRAN version of the *bbreg* package, run:
 install.packages("bbreg")
 ```
 
-## Latest version
+## Latest version of *bbreg*
 
 The latest version of the *bbreg* package can be installed from its *github* repository by
 using the command:
