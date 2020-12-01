@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Wagner Barreto-Souza, Vinicius Mayrink, Alexandre B. Simas" />
+
+
+<title>Introduction to bbreg</title>
+
+<script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
+// v0.0.1
+// Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
+
+document.addEventListener('DOMContentLoaded', function() {
+  const codeList = document.getElementsByClassName("sourceCode");
+  for (var i = 0; i < codeList.length; i++) {
+    var linkList = codeList[i].getElementsByTagName('a');
+    for (var j = 0; j < linkList.length; j++) {
+      if (linkList[j].innerHTML === "") {
+        linkList[j].setAttribute('aria-hidden', 'true');
+      }
+    }
+  }
+});
+</script>
+<style type="text/css">
+a.anchor-section {margin-left: 10px; visibility: hidden; color: inherit;}
+a.anchor-section::before {content: '#';}
+.hasAnchor:hover a.anchor-section {visibility: visible;}
+</style>
+<script>// Anchor sections v1.0 written by Atsushi Yasumoto on Oct 3rd, 2020.
+document.addEventListener('DOMContentLoaded', function() {
+  // Do nothing if AnchorJS is used
+  if (typeof window.anchors === 'object' && anchors.hasOwnProperty('hasAnchorJSLink')) {
+    return;
+  }
+
+  const h = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+
+  // Do nothing if sections are already anchored
+  if (Array.from(h).some(x => x.classList.contains('hasAnchor'))) {
+    return null;
+  }
+
+  // Use section id when pandoc runs with --section-divs
+  const section_id = function(x) {
+    return ((x.classList.contains('section') || (x.tagName === 'SECTION'))
+            ? x.id : '');
+  };
+
+  // Add anchors
+  h.forEach(function(x) {
+    const id = x.id || section_id(x.parentElement);
+    if (id === '') {
+      return null;
+    }
+    let anchor = document.createElement('a');
+    anchor.href = '#' + id;
+    anchor.classList = ['anchor-section'];
+    x.classList.add('hasAnchor');
+    x.appendChild(anchor);
+  });
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+code.sourceCode > span { display: inline-block; line-height: 1.25; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Introduction to bbreg</h1>
+<h4 class="author">Wagner Barreto-Souza, Vinicius Mayrink, Alexandre B. Simas</h4>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">library</span>(bbreg)</span></code></pre></div>
+<div id="brief-introduction" class="section level1">
+<h1>Brief introduction</h1>
+<p>The <em>bbreg</em> package deals with regression models with response variables being continuous and bounded. It currently provides implementation of two regression models: beta regression <a href="https://www.tandfonline.com/doi/abs/10.1080/0266476042000214501" class="uri">https://www.tandfonline.com/doi/abs/10.1080/0266476042000214501</a> and bessel regression <a href="https://arxiv.org/abs/2003.05157" class="uri">https://arxiv.org/abs/2003.05157</a>. For both of these models, the estimation is done with the EM-algorithm. The EM-algorithm approach for beta regression was developed in <a href="https://www.tandfonline.com/doi/abs/10.1080/00949655.2017.1350679" class="uri">https://www.tandfonline.com/doi/abs/10.1080/00949655.2017.1350679</a>.</p>
+<div id="updates" class="section level2">
+<h2>Updates</h2>
+<p>Check for updates of this vignette on <a href="https://rpubs.com/alexandrebsimas/intro-bbreg" class="uri">https://rpubs.com/alexandrebsimas/intro-bbreg</a></p>
+</div>
+<div id="installing-the-cran-version" class="section level2">
+<h2>Installing the CRAN version</h2>
+<p>To install the CRAN version of the <em>bbreg</em> package, run:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">install.packages</span>(<span class="st">&quot;bbreg&quot;</span>)</span></code></pre></div>
+</div>
+<div id="latest-version" class="section level2">
+<h2>Latest version</h2>
+<p>The latest version of the <em>bbreg</em> package can be installed from its <em>github</em> repository by using the command:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>devtools<span class="op">::</span><span class="kw">install_github</span>(<span class="st">&quot;vpnsctl/bbreg/bbreg&quot;</span>)</span></code></pre></div>
+<p>To install the <em>bbreg</em> package from its <em>github</em> repository <strong>with vignette</strong>, run the command:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>devtools<span class="op">::</span><span class="kw">install_github</span>(<span class="st">&quot;vpnsctl/bbreg/bbreg&quot;</span>, <span class="dt">build_vignettes =</span> <span class="ot">TRUE</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="choosing-between-bessel-regression-and-beta-regression" class="section level1">
+<h1>Choosing between bessel regression and beta regression</h1>
+<p>There are several manners to choose between bessel and beta regression, most of them using diagnostic analysis. One approach we would like to call attention is the <strong>discrimination test</strong> developed in the bessel regression paper <a href="https://arxiv.org/abs/2003.05157" class="uri">https://arxiv.org/abs/2003.05157</a>. This discrimination test has a very nice performance on selecting the “correct” distribution (in the sense that it performs well with synthetic data) and is implemented in the <em>bbreg</em> package.</p>
+<p>Another approach to select between bessel and beta regression models is to use quantile-quantile plots with simulated envelopes. The <em>bbreg</em> package also has a function to build such plots.</p>
+<p>We will show below how to use the discrimination test and how to construct the quantile-quantile plot with simulated envelopes.</p>
+</div>
+<div id="using-the-bbreg-package" class="section level1">
+<h1>Using the bbreg package</h1>
+<p>From version 2.0.0 onward, the usage of the <em>bbreg</em> package is standard in the sense that it uses <em>formula</em> to handle data frames and that it has several standard S3 methods implemented, such as <em>summary</em>, <em>plot</em>, <em>fitted</em>, <em>predict</em>, etc.</p>
+<p>If the regression model is not specified (via the <em>model</em> parameter), the discrimination test is used to select the regression model to be used.</p>
+<div id="fitting-bbreg-bessel-or-beta-regression-models" class="section level2">
+<h2>Fitting <em>bbreg</em> (bessel or beta regression) models</h2>
+<p>Let us fit a model:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>fit &lt;-<span class="st"> </span><span class="kw">bbreg</span>(agreement <span class="op">~</span><span class="st"> </span>priming <span class="op">+</span><span class="st"> </span>eliciting, <span class="dt">data =</span> WT)</span></code></pre></div>
+<p>Let us now see its output (notice that it provides a nice print when the fitted object is called):</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>fit</span>
+<span id="cb6-2"><a href="#cb6-2"></a><span class="co">#&gt; </span></span>
+<span id="cb6-3"><a href="#cb6-3"></a><span class="co">#&gt; Bessel regression via EM - Model selected via Discrimination test (DBB)</span></span>
+<span id="cb6-4"><a href="#cb6-4"></a><span class="co">#&gt; </span></span>
+<span id="cb6-5"><a href="#cb6-5"></a><span class="co">#&gt; Call: </span></span>
+<span id="cb6-6"><a href="#cb6-6"></a><span class="co">#&gt; bbreg(agreement ~ priming + eliciting | 1)</span></span>
+<span id="cb6-7"><a href="#cb6-7"></a><span class="co">#&gt; </span></span>
+<span id="cb6-8"><a href="#cb6-8"></a><span class="co">#&gt; Coefficients modeling the mean (with logit link):</span></span>
+<span id="cb6-9"><a href="#cb6-9"></a><span class="co">#&gt; (intercept)     priming   eliciting </span></span>
+<span id="cb6-10"><a href="#cb6-10"></a><span class="co">#&gt;  -1.1537851  -0.2548633   0.3392742 </span></span>
+<span id="cb6-11"><a href="#cb6-11"></a><span class="co">#&gt; Coefficients modeling the precision (with identity link):</span></span>
+<span id="cb6-12"><a href="#cb6-12"></a><span class="co">#&gt; (intercept) </span></span>
+<span id="cb6-13"><a href="#cb6-13"></a><span class="co">#&gt;    4.924825</span></span></code></pre></div>
+<p>It is also noteworthy that the bessel regression model was chosen based on the discrimination criteria. If we want to fit a beta regression model (with estimates obtained from the EM algorithm, which are more robust than the usual maximum likelihood estimates due to the flatness of the likelihood function with respect to the precision parameter), we pass the argument <em>model = “beta”</em>:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>fit_beta &lt;-<span class="st"> </span><span class="kw">bbreg</span>(agreement <span class="op">~</span><span class="st"> </span>priming <span class="op">+</span><span class="st"> </span>eliciting, <span class="dt">data =</span> WT, <span class="dt">model =</span> <span class="st">&quot;beta&quot;</span>)</span>
+<span id="cb7-2"><a href="#cb7-2"></a>fit_beta</span>
+<span id="cb7-3"><a href="#cb7-3"></a><span class="co">#&gt; </span></span>
+<span id="cb7-4"><a href="#cb7-4"></a><span class="co">#&gt; Beta regression via EM - Ignoring the Discrimination test (DBB)</span></span>
+<span id="cb7-5"><a href="#cb7-5"></a><span class="co">#&gt; </span></span>
+<span id="cb7-6"><a href="#cb7-6"></a><span class="co">#&gt; Call: </span></span>
+<span id="cb7-7"><a href="#cb7-7"></a><span class="co">#&gt; bbreg(agreement ~ priming + eliciting | 1)</span></span>
+<span id="cb7-8"><a href="#cb7-8"></a><span class="co">#&gt; </span></span>
+<span id="cb7-9"><a href="#cb7-9"></a><span class="co">#&gt; Coefficients modeling the mean (with logit link):</span></span>
+<span id="cb7-10"><a href="#cb7-10"></a><span class="co">#&gt; (intercept)     priming   eliciting </span></span>
+<span id="cb7-11"><a href="#cb7-11"></a><span class="co">#&gt;  -1.1354350  -0.3003169   0.3307395 </span></span>
+<span id="cb7-12"><a href="#cb7-12"></a><span class="co">#&gt; Coefficients modeling the precision (with identity link):</span></span>
+<span id="cb7-13"><a href="#cb7-13"></a><span class="co">#&gt; (intercept) </span></span>
+<span id="cb7-14"><a href="#cb7-14"></a><span class="co">#&gt;    7.657369</span></span></code></pre></div>
+<p>Observe that the <em>bbreg</em> package makes it explicit that the discrimination test was ignored and the beta regression was perfomed.</p>
+<p>Let us now add a precision covariate. Let us add the covariate <em>priming</em> as precision covariate. To this end, we add “<em>| priming</em>” to the end of the formula:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>fit_priming &lt;-<span class="st"> </span><span class="kw">bbreg</span>(agreement <span class="op">~</span><span class="st"> </span>priming <span class="op">+</span><span class="st"> </span>eliciting <span class="op">|</span><span class="st"> </span>priming, <span class="dt">data =</span> WT)</span>
+<span id="cb8-2"><a href="#cb8-2"></a>fit_priming</span>
+<span id="cb8-3"><a href="#cb8-3"></a><span class="co">#&gt; </span></span>
+<span id="cb8-4"><a href="#cb8-4"></a><span class="co">#&gt; Bessel regression via EM - Model selected via Discrimination test (DBB)</span></span>
+<span id="cb8-5"><a href="#cb8-5"></a><span class="co">#&gt; </span></span>
+<span id="cb8-6"><a href="#cb8-6"></a><span class="co">#&gt; Call: </span></span>
+<span id="cb8-7"><a href="#cb8-7"></a><span class="co">#&gt; bbreg(agreement ~ priming + eliciting | priming)</span></span>
+<span id="cb8-8"><a href="#cb8-8"></a><span class="co">#&gt; </span></span>
+<span id="cb8-9"><a href="#cb8-9"></a><span class="co">#&gt; Coefficients modeling the mean (with logit link):</span></span>
+<span id="cb8-10"><a href="#cb8-10"></a><span class="co">#&gt; (intercept)     priming   eliciting </span></span>
+<span id="cb8-11"><a href="#cb8-11"></a><span class="co">#&gt;  -1.1192967  -0.4062379   0.3763049 </span></span>
+<span id="cb8-12"><a href="#cb8-12"></a><span class="co">#&gt; Coefficients modeling the precision (with log link):</span></span>
+<span id="cb8-13"><a href="#cb8-13"></a><span class="co">#&gt; (intercept)     priming </span></span>
+<span id="cb8-14"><a href="#cb8-14"></a><span class="co">#&gt;   1.3195882   0.7192713</span></span></code></pre></div>
+<p>To add both <em>priming</em> and <em>eliciting</em> as precision covariates, we add “<em>|priming + eliciting</em>” to the end of the formula:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>fit_priming_eliciting &lt;-<span class="st"> </span><span class="kw">bbreg</span>(agreement <span class="op">~</span><span class="st"> </span>priming <span class="op">+</span><span class="st"> </span>eliciting <span class="op">|</span><span class="st"> </span>priming <span class="op">+</span><span class="st"> </span>eliciting, <span class="dt">data =</span> WT)</span>
+<span id="cb9-2"><a href="#cb9-2"></a>fit_priming_eliciting</span>
+<span id="cb9-3"><a href="#cb9-3"></a><span class="co">#&gt; </span></span>
+<span id="cb9-4"><a href="#cb9-4"></a><span class="co">#&gt; Bessel regression via EM - Model selected via Discrimination test (DBB)</span></span>
+<span id="cb9-5"><a href="#cb9-5"></a><span class="co">#&gt; </span></span>
+<span id="cb9-6"><a href="#cb9-6"></a><span class="co">#&gt; Call: </span></span>
+<span id="cb9-7"><a href="#cb9-7"></a><span class="co">#&gt; bbreg(agreement ~ priming + eliciting | priming + eliciting)</span></span>
+<span id="cb9-8"><a href="#cb9-8"></a><span class="co">#&gt; </span></span>
+<span id="cb9-9"><a href="#cb9-9"></a><span class="co">#&gt; Coefficients modeling the mean (with logit link):</span></span>
+<span id="cb9-10"><a href="#cb9-10"></a><span class="co">#&gt; (intercept)     priming   eliciting </span></span>
+<span id="cb9-11"><a href="#cb9-11"></a><span class="co">#&gt;  -1.0987423  -0.3954700   0.3318582 </span></span>
+<span id="cb9-12"><a href="#cb9-12"></a><span class="co">#&gt; Coefficients modeling the precision (with log link):</span></span>
+<span id="cb9-13"><a href="#cb9-13"></a><span class="co">#&gt; (intercept)     priming   eliciting </span></span>
+<span id="cb9-14"><a href="#cb9-14"></a><span class="co">#&gt;   1.2100896   0.7159740   0.2146362</span></span></code></pre></div>
+</div>
+<div id="viewing-summaries" class="section level2">
+<h2>Viewing summaries</h2>
+<p>To view a summary of the fitted model, we simply call the method <em>summary</em> to the fitted <em>bbreg</em> object:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a><span class="kw">summary</span>(fit)</span>
+<span id="cb10-2"><a href="#cb10-2"></a><span class="co">#&gt; </span></span>
+<span id="cb10-3"><a href="#cb10-3"></a><span class="co">#&gt; Bessel regression via EM - Model selected via Discrimination test (DBB):</span></span>
+<span id="cb10-4"><a href="#cb10-4"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb10-5"><a href="#cb10-5"></a><span class="co">#&gt; bbreg(agreement ~ priming + eliciting | 1)</span></span>
+<span id="cb10-6"><a href="#cb10-6"></a><span class="co">#&gt; Number of iterations of the EM algorithm = 297</span></span>
+<span id="cb10-7"><a href="#cb10-7"></a><span class="co">#&gt; </span></span>
+<span id="cb10-8"><a href="#cb10-8"></a><span class="co">#&gt;  Results of the discrimination test DBB:</span></span>
+<span id="cb10-9"><a href="#cb10-9"></a><span class="co">#&gt;     sum(z2/n) sum(quasi_mu)    |D_bessel|      |D_beta| </span></span>
+<span id="cb10-10"><a href="#cb10-10"></a><span class="co">#&gt;        0.0853       52.6201        0.0004        0.0030 </span></span>
+<span id="cb10-11"><a href="#cb10-11"></a><span class="co">#&gt; </span></span>
+<span id="cb10-12"><a href="#cb10-12"></a><span class="co">#&gt;  Pearson residuals:</span></span>
+<span id="cb10-13"><a href="#cb10-13"></a><span class="co">#&gt;      RSS      Min       1Q   Median       3Q      Max </span></span>
+<span id="cb10-14"><a href="#cb10-14"></a><span class="co">#&gt; 331.9432  -1.7387  -0.6606  -0.3847   0.5562   4.5786 </span></span>
+<span id="cb10-15"><a href="#cb10-15"></a><span class="co">#&gt; </span></span>
+<span id="cb10-16"><a href="#cb10-16"></a><span class="co">#&gt;  Coefficients modeling the mean (with logit link):</span></span>
+<span id="cb10-17"><a href="#cb10-17"></a><span class="co">#&gt;             Estimate Std.error z-value Pr(&gt;|z|)    </span></span>
+<span id="cb10-18"><a href="#cb10-18"></a><span class="co">#&gt; (intercept) -1.15379   0.05251 -21.971  &lt; 2e-16 ***</span></span>
+<span id="cb10-19"><a href="#cb10-19"></a><span class="co">#&gt; priming     -0.25486   0.05733  -4.446 8.77e-06 ***</span></span>
+<span id="cb10-20"><a href="#cb10-20"></a><span class="co">#&gt; eliciting    0.33927   0.05846   5.804 6.49e-09 ***</span></span>
+<span id="cb10-21"><a href="#cb10-21"></a><span class="co">#&gt; </span></span>
+<span id="cb10-22"><a href="#cb10-22"></a><span class="co">#&gt;  Coefficients modeling the precision (with identity link):</span></span>
+<span id="cb10-23"><a href="#cb10-23"></a><span class="co">#&gt;             Estimate Std.error z-value Pr(&gt;|z|)    </span></span>
+<span id="cb10-24"><a href="#cb10-24"></a><span class="co">#&gt; (intercept)   4.9248    0.4493   10.96   &lt;2e-16 ***</span></span>
+<span id="cb10-25"><a href="#cb10-25"></a><span class="co">#&gt; g(phi) = 0.1316</span></span>
+<span id="cb10-26"><a href="#cb10-26"></a><span class="co">#&gt; ---</span></span>
+<span id="cb10-27"><a href="#cb10-27"></a><span class="co">#&gt;  Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</span></span></code></pre></div>
+<p>For the beta regression fit:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a><span class="kw">summary</span>(fit_beta)</span>
+<span id="cb11-2"><a href="#cb11-2"></a><span class="co">#&gt; </span></span>
+<span id="cb11-3"><a href="#cb11-3"></a><span class="co">#&gt; Beta regression via EM - Ignoring the Discrimination test (DBB):</span></span>
+<span id="cb11-4"><a href="#cb11-4"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb11-5"><a href="#cb11-5"></a><span class="co">#&gt; bbreg(agreement ~ priming + eliciting | 1)</span></span>
+<span id="cb11-6"><a href="#cb11-6"></a><span class="co">#&gt; Number of iterations of the EM algorithm = 173</span></span>
+<span id="cb11-7"><a href="#cb11-7"></a><span class="co">#&gt; </span></span>
+<span id="cb11-8"><a href="#cb11-8"></a><span class="co">#&gt;  Pearson residuals:</span></span>
+<span id="cb11-9"><a href="#cb11-9"></a><span class="co">#&gt;      RSS      Min       1Q   Median       3Q      Max </span></span>
+<span id="cb11-10"><a href="#cb11-10"></a><span class="co">#&gt; 377.2069  -1.8658  -0.6997  -0.3824   0.5793   4.8412 </span></span>
+<span id="cb11-11"><a href="#cb11-11"></a><span class="co">#&gt; </span></span>
+<span id="cb11-12"><a href="#cb11-12"></a><span class="co">#&gt;  Coefficients modeling the mean (with logit link):</span></span>
+<span id="cb11-13"><a href="#cb11-13"></a><span class="co">#&gt;             Estimate Std.error z-value Pr(&gt;|z|)    </span></span>
+<span id="cb11-14"><a href="#cb11-14"></a><span class="co">#&gt; (intercept) -1.13543   0.07076 -16.046  &lt; 2e-16 ***</span></span>
+<span id="cb11-15"><a href="#cb11-15"></a><span class="co">#&gt; priming     -0.30032   0.08101  -3.707  0.00021 ***</span></span>
+<span id="cb11-16"><a href="#cb11-16"></a><span class="co">#&gt; eliciting    0.33074   0.08083   4.092 4.28e-05 ***</span></span>
+<span id="cb11-17"><a href="#cb11-17"></a><span class="co">#&gt; </span></span>
+<span id="cb11-18"><a href="#cb11-18"></a><span class="co">#&gt;  Coefficients modeling the precision (with identity link):</span></span>
+<span id="cb11-19"><a href="#cb11-19"></a><span class="co">#&gt;             Estimate Std.error z-value Pr(&gt;|z|)    </span></span>
+<span id="cb11-20"><a href="#cb11-20"></a><span class="co">#&gt; (intercept)   7.6574    0.5632    13.6   &lt;2e-16 ***</span></span>
+<span id="cb11-21"><a href="#cb11-21"></a><span class="co">#&gt; g(phi) = 0.1155</span></span>
+<span id="cb11-22"><a href="#cb11-22"></a><span class="co">#&gt; ---</span></span>
+<span id="cb11-23"><a href="#cb11-23"></a><span class="co">#&gt;  Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</span></span></code></pre></div>
+<p>For the fit with priming as covariates:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a><span class="kw">summary</span>(fit_priming)</span>
+<span id="cb12-2"><a href="#cb12-2"></a><span class="co">#&gt; </span></span>
+<span id="cb12-3"><a href="#cb12-3"></a><span class="co">#&gt; Bessel regression via EM - Model selected via Discrimination test (DBB):</span></span>
+<span id="cb12-4"><a href="#cb12-4"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb12-5"><a href="#cb12-5"></a><span class="co">#&gt; bbreg(agreement ~ priming + eliciting | priming)</span></span>
+<span id="cb12-6"><a href="#cb12-6"></a><span class="co">#&gt; Number of iterations of the EM algorithm = 221</span></span>
+<span id="cb12-7"><a href="#cb12-7"></a><span class="co">#&gt; </span></span>
+<span id="cb12-8"><a href="#cb12-8"></a><span class="co">#&gt;  Results of the discrimination test DBB:</span></span>
+<span id="cb12-9"><a href="#cb12-9"></a><span class="co">#&gt;     sum(z2/n) sum(quasi_mu)    |D_bessel|      |D_beta| </span></span>
+<span id="cb12-10"><a href="#cb12-10"></a><span class="co">#&gt;        0.0853       52.6201        0.0002        0.0026 </span></span>
+<span id="cb12-11"><a href="#cb12-11"></a><span class="co">#&gt; </span></span>
+<span id="cb12-12"><a href="#cb12-12"></a><span class="co">#&gt;  Pearson residuals:</span></span>
+<span id="cb12-13"><a href="#cb12-13"></a><span class="co">#&gt;      RSS      Min       1Q   Median       3Q      Max </span></span>
+<span id="cb12-14"><a href="#cb12-14"></a><span class="co">#&gt; 341.2741  -1.6532  -0.6773  -0.3175   0.6081   4.3879 </span></span>
+<span id="cb12-15"><a href="#cb12-15"></a><span class="co">#&gt; </span></span>
+<span id="cb12-16"><a href="#cb12-16"></a><span class="co">#&gt;  Coefficients modeling the mean (with logit link):</span></span>
+<span id="cb12-17"><a href="#cb12-17"></a><span class="co">#&gt;             Estimate Std.error z-value Pr(&gt;|z|)    </span></span>
+<span id="cb12-18"><a href="#cb12-18"></a><span class="co">#&gt; (intercept) -1.11930   0.05584 -20.043  &lt; 2e-16 ***</span></span>
+<span id="cb12-19"><a href="#cb12-19"></a><span class="co">#&gt; priming     -0.40624   0.06034  -6.733 1.67e-11 ***</span></span>
+<span id="cb12-20"><a href="#cb12-20"></a><span class="co">#&gt; eliciting    0.37630   0.05694   6.609 3.87e-11 ***</span></span>
+<span id="cb12-21"><a href="#cb12-21"></a><span class="co">#&gt; </span></span>
+<span id="cb12-22"><a href="#cb12-22"></a><span class="co">#&gt;  Coefficients modeling the precision (with log link):</span></span>
+<span id="cb12-23"><a href="#cb12-23"></a><span class="co">#&gt;             Estimate Std.error z-value Pr(&gt;|z|)    </span></span>
+<span id="cb12-24"><a href="#cb12-24"></a><span class="co">#&gt; (intercept)   1.3196    0.1304  10.117  &lt; 2e-16 ***</span></span>
+<span id="cb12-25"><a href="#cb12-25"></a><span class="co">#&gt; priming       0.7193    0.1816   3.961 7.46e-05 ***</span></span>
+<span id="cb12-26"><a href="#cb12-26"></a><span class="co">#&gt; ---</span></span>
+<span id="cb12-27"><a href="#cb12-27"></a><span class="co">#&gt;  Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</span></span></code></pre></div>
+</div>
+<div id="changing-link-functions" class="section level2">
+<h2>Changing link functions</h2>
+<p>The <em>bbreg</em> package allows for several link functions for the mean and precision parameters. If the link function for the mean is not specified, the <em>bbreg</em> package will consider a <em>logit</em> link function for the mean parameter. If the link function for the precision parameter is not specified and there are no covariates for the precision parameter, then the <em>identity</em> link function will be used. If the link function for the precision parameter is not specified and there are covariates for the precision parameter, then the <em>log</em> link function will be used.</p>
+<p>To change the link function for the mean parameter, just change the <em>link.mean</em> argument. The currently implemented link functions for the mean parameter are <em>logit</em>,<em>probit</em>, <em>cauchit</em>, <em>cloglog</em>.</p>
+<p>To change the link function for the precision parameter, just change the <em>link.precision</em> argument. The currently implemented link functions for the precision parameter are <em>identity</em>, <em>log</em>, <em>sqrt</em>, <em>inverse</em>.</p>
+<p>In the next example we will consider the regression model in the <strong>fit</strong> example above, but choosing the <em>cloglog</em> as link function for the mean:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a>fit_cloglog &lt;-<span class="st"> </span><span class="kw">bbreg</span>(agreement <span class="op">~</span><span class="st"> </span>priming <span class="op">+</span><span class="st"> </span>eliciting, <span class="dt">data =</span> WT, <span class="dt">link.mean =</span> <span class="st">&quot;cloglog&quot;</span>)</span>
+<span id="cb13-2"><a href="#cb13-2"></a>fit_cloglog</span>
+<span id="cb13-3"><a href="#cb13-3"></a><span class="co">#&gt; </span></span>
+<span id="cb13-4"><a href="#cb13-4"></a><span class="co">#&gt; Bessel regression via EM - Model selected via Discrimination test (DBB)</span></span>
+<span id="cb13-5"><a href="#cb13-5"></a><span class="co">#&gt; </span></span>
+<span id="cb13-6"><a href="#cb13-6"></a><span class="co">#&gt; Call: </span></span>
+<span id="cb13-7"><a href="#cb13-7"></a><span class="co">#&gt; bbreg(agreement ~ priming + eliciting | 1)</span></span>
+<span id="cb13-8"><a href="#cb13-8"></a><span class="co">#&gt; </span></span>
+<span id="cb13-9"><a href="#cb13-9"></a><span class="co">#&gt; Coefficients modeling the mean (with cloglog link):</span></span>
+<span id="cb13-10"><a href="#cb13-10"></a><span class="co">#&gt; (intercept)     priming   eliciting </span></span>
+<span id="cb13-11"><a href="#cb13-11"></a><span class="co">#&gt;  -1.2963459  -0.2195840   0.2934043 </span></span>
+<span id="cb13-12"><a href="#cb13-12"></a><span class="co">#&gt; Coefficients modeling the precision (with identity link):</span></span>
+<span id="cb13-13"><a href="#cb13-13"></a><span class="co">#&gt; (intercept) </span></span>
+<span id="cb13-14"><a href="#cb13-14"></a><span class="co">#&gt;    4.920609</span></span></code></pre></div>
+<p>Now, we will also set the link function for the precision parameter to be <em>sqrt</em>:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a>fit_cloglog_sqrt &lt;-<span class="st"> </span><span class="kw">bbreg</span>(agreement <span class="op">~</span><span class="st"> </span>priming <span class="op">+</span><span class="st"> </span>eliciting, <span class="dt">data =</span> WT, </span>
+<span id="cb14-2"><a href="#cb14-2"></a>                          <span class="dt">link.mean =</span> <span class="st">&quot;cloglog&quot;</span>, <span class="dt">link.precision =</span> <span class="st">&quot;sqrt&quot;</span>)</span>
+<span id="cb14-3"><a href="#cb14-3"></a>fit_cloglog_sqrt</span>
+<span id="cb14-4"><a href="#cb14-4"></a><span class="co">#&gt; </span></span>
+<span id="cb14-5"><a href="#cb14-5"></a><span class="co">#&gt; Bessel regression via EM - Model selected via Discrimination test (DBB)</span></span>
+<span id="cb14-6"><a href="#cb14-6"></a><span class="co">#&gt; </span></span>
+<span id="cb14-7"><a href="#cb14-7"></a><span class="co">#&gt; Call: </span></span>
+<span id="cb14-8"><a href="#cb14-8"></a><span class="co">#&gt; bbreg(agreement ~ priming + eliciting | 1)</span></span>
+<span id="cb14-9"><a href="#cb14-9"></a><span class="co">#&gt; </span></span>
+<span id="cb14-10"><a href="#cb14-10"></a><span class="co">#&gt; Coefficients modeling the mean (with cloglog link):</span></span>
+<span id="cb14-11"><a href="#cb14-11"></a><span class="co">#&gt; (intercept)     priming   eliciting </span></span>
+<span id="cb14-12"><a href="#cb14-12"></a><span class="co">#&gt;  -1.2963394  -0.2195984   0.2933894 </span></span>
+<span id="cb14-13"><a href="#cb14-13"></a><span class="co">#&gt; Coefficients modeling the precision (with sqrt link):</span></span>
+<span id="cb14-14"><a href="#cb14-14"></a><span class="co">#&gt; (intercept) </span></span>
+<span id="cb14-15"><a href="#cb14-15"></a><span class="co">#&gt;    2.218402</span></span></code></pre></div>
+<p>We can also only change the link function for the precision parameter.</p>
+<p>For instance, we will set the link function for the precision parameter to be <em>sqrt</em>:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a>fit_priming_sqrt &lt;-<span class="st"> </span><span class="kw">bbreg</span>(agreement <span class="op">~</span><span class="st"> </span>priming <span class="op">+</span><span class="st"> </span>eliciting<span class="op">|</span><span class="st"> </span>priming, <span class="dt">data =</span> WT, </span>
+<span id="cb15-2"><a href="#cb15-2"></a>                          <span class="dt">link.precision =</span> <span class="st">&quot;sqrt&quot;</span>)</span>
+<span id="cb15-3"><a href="#cb15-3"></a>fit_priming_sqrt</span>
+<span id="cb15-4"><a href="#cb15-4"></a><span class="co">#&gt; </span></span>
+<span id="cb15-5"><a href="#cb15-5"></a><span class="co">#&gt; Bessel regression via EM - Model selected via Discrimination test (DBB)</span></span>
+<span id="cb15-6"><a href="#cb15-6"></a><span class="co">#&gt; </span></span>
+<span id="cb15-7"><a href="#cb15-7"></a><span class="co">#&gt; Call: </span></span>
+<span id="cb15-8"><a href="#cb15-8"></a><span class="co">#&gt; bbreg(agreement ~ priming + eliciting | priming)</span></span>
+<span id="cb15-9"><a href="#cb15-9"></a><span class="co">#&gt; </span></span>
+<span id="cb15-10"><a href="#cb15-10"></a><span class="co">#&gt; Coefficients modeling the mean (with logit link):</span></span>
+<span id="cb15-11"><a href="#cb15-11"></a><span class="co">#&gt; (intercept)     priming   eliciting </span></span>
+<span id="cb15-12"><a href="#cb15-12"></a><span class="co">#&gt;  -1.1193457  -0.4061258   0.3762829 </span></span>
+<span id="cb15-13"><a href="#cb15-13"></a><span class="co">#&gt; Coefficients modeling the precision (with sqrt link):</span></span>
+<span id="cb15-14"><a href="#cb15-14"></a><span class="co">#&gt; (intercept)     priming </span></span>
+<span id="cb15-15"><a href="#cb15-15"></a><span class="co">#&gt;   1.9346442   0.8366643</span></span></code></pre></div>
+</div>
+<div id="getting-fitted-values" class="section level2">
+<h2>Getting fitted values</h2>
+<p>If we want to get the fitted values, we can use the <em>fitted</em> method on the fitted <em>bbreg</em> object. We can have four types of fitted values: the <em>response</em>, which provides the fitted means, the <em>link</em> which provides the the fitted linear predictors for the means, the <em>precision</em> which provides the fitted precisions and <em>variance</em> which provides the fitted variances for the response variables.</p>
+<p>For example, consider the <strong>fit</strong> object in the first example. We can obtain the fitted means by simply calling the <em>fitted</em> method:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a>fitted_means &lt;-<span class="st"> </span><span class="kw">fitted</span>(fit)</span>
+<span id="cb16-2"><a href="#cb16-2"></a><span class="kw">head</span>(fitted_means)</span>
+<span id="cb16-3"><a href="#cb16-3"></a><span class="co">#&gt;         1         2         3         4         5         6 </span></span>
+<span id="cb16-4"><a href="#cb16-4"></a><span class="co">#&gt; 0.2397984 0.2397984 0.2397984 0.2397984 0.2397984 0.2397984</span></span></code></pre></div>
+<p>and by passing the argument <em>type = “variance”</em>, we get:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a>fitted_variances &lt;-<span class="st"> </span><span class="kw">fitted</span>(fit, <span class="dt">type =</span> <span class="st">&quot;variance&quot;</span>)</span>
+<span id="cb17-2"><a href="#cb17-2"></a><span class="kw">head</span>(fitted_variances)</span>
+<span id="cb17-3"><a href="#cb17-3"></a><span class="co">#&gt;          1          2          3          4          5          6 </span></span>
+<span id="cb17-4"><a href="#cb17-4"></a><span class="co">#&gt; 0.02399282 0.02399282 0.02399282 0.02399282 0.02399282 0.02399282</span></span></code></pre></div>
+</div>
+<div id="making-predictions" class="section level2">
+<h2>Making predictions</h2>
+<p>To get predictions, we use the <em>predict</em> method on the fitted <em>bbreg</em> object. We can pass an additional argument <em>newdata</em> equal to a data frame containing the values of the covariates to get predictions based on these covariates. If one does not pass the <em>newdata</em> argument, this functions returns the <em>fitted</em> values (that is, if the <em>newdata</em> parameter is <em>NULL</em>, then this method is identical to the <em>fitted</em> method).</p>
+<p>Let us create a data frame containing new covariates for the fitted model <strong>fit_priming_eliciting</strong>:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a>new_data_example &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">priming =</span> <span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>), <span class="dt">eliciting =</span> <span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">1</span>))</span></code></pre></div>
+<p>Now, let us obtain the corresponding predicted mean values and predicted variances for the response variables:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1"></a><span class="kw">predict</span>(fit_priming_eliciting, <span class="dt">newdata =</span> new_data_example)</span>
+<span id="cb19-2"><a href="#cb19-2"></a><span class="co">#&gt;         1         2         3 </span></span>
+<span id="cb19-3"><a href="#cb19-3"></a><span class="co">#&gt; 0.2499756 0.3171535 0.2382398</span></span>
+<span id="cb19-4"><a href="#cb19-4"></a><span class="kw">predict</span>(fit_priming_eliciting, <span class="dt">newdata =</span> new_data_example, <span class="dt">type =</span> <span class="st">&quot;variance&quot;</span>)</span>
+<span id="cb19-5"><a href="#cb19-5"></a><span class="co">#&gt;          1          2          3 </span></span>
+<span id="cb19-6"><a href="#cb19-6"></a><span class="co">#&gt; 0.03150342 0.03186165 0.01609758</span></span></code></pre></div>
+<p>It is interesting to observe that the above fitted model has priming and eliciting as covariates for both the mean and the precision parameters. We do not have to worry about that, the <em>bbreg</em> handles it automatically.</p>
+<p>The same <em>new_data_example</em> can also be used for the fitted model <strong>fit</strong>, which does not have precision covariates (<em>priming</em> and <em>eliciting</em> are covariates for the mean):</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1"></a><span class="kw">predict</span>(fit, <span class="dt">newdata =</span> new_data_example)</span>
+<span id="cb20-2"><a href="#cb20-2"></a><span class="co">#&gt;         1         2         3 </span></span>
+<span id="cb20-3"><a href="#cb20-3"></a><span class="co">#&gt; 0.2397984 0.3069301 0.2555221</span></span>
+<span id="cb20-4"><a href="#cb20-4"></a><span class="kw">predict</span>(fit, <span class="dt">newdata =</span> new_data_example, <span class="dt">type =</span> <span class="st">&quot;variance&quot;</span>)</span>
+<span id="cb20-5"><a href="#cb20-5"></a><span class="co">#&gt;          1          2          3 </span></span>
+<span id="cb20-6"><a href="#cb20-6"></a><span class="co">#&gt; 0.02399282 0.02799772 0.02503724</span></span></code></pre></div>
+<p>In short, the data frame to be passed as <em>newdata</em> must contain all the mean and precision covariates as columns, the <em>bbreg</em> package handles the rest.</p>
+<p>Lastly, observe that if we do not pass the argument <em>newdata</em>, the <em>predict</em> method coincides with the <em>fitted</em> method:</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a>predict_without_newdata &lt;-<span class="st"> </span><span class="kw">predict</span>(fit)</span>
+<span id="cb21-2"><a href="#cb21-2"></a><span class="kw">identical</span>(predict_without_newdata, fitted_means)</span>
+<span id="cb21-3"><a href="#cb21-3"></a><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
+</div>
+<div id="creating-simulated-envelopes" class="section level2">
+<h2>Creating simulated envelopes</h2>
+<p>To create simulated envelopes for a <em>bbreg</em> object, we just need to set the number of random draws to be made at the <em>envelope</em> argument of the <em>bbreg</em> function:</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1"></a>fit_envelope &lt;-<span class="st"> </span><span class="kw">bbreg</span>(agreement <span class="op">~</span><span class="st"> </span>priming <span class="op">+</span><span class="st"> </span>eliciting, <span class="dt">envelope =</span> <span class="dv">300</span>, <span class="dt">data =</span> WT)</span></code></pre></div>
+<p>Observe that the <em>bbreg</em> function (through the usage of the <em>pbapply</em> package) provides a nice progress bar with an estimate of the remaining time to complete the simulation.</p>
+<p>The <em>summary</em> method provides the percentage of data within the bands formed by the simulated envelopes. This can also be used as a criterion to select between the bessel and beta regressions.</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a><span class="kw">summary</span>(fit_envelope)</span>
+<span id="cb23-2"><a href="#cb23-2"></a><span class="co">#&gt; </span></span>
+<span id="cb23-3"><a href="#cb23-3"></a><span class="co">#&gt; Bessel regression via EM - Model selected via Discrimination test (DBB):</span></span>
+<span id="cb23-4"><a href="#cb23-4"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb23-5"><a href="#cb23-5"></a><span class="co">#&gt; bbreg(agreement ~ priming + eliciting | 1)</span></span>
+<span id="cb23-6"><a href="#cb23-6"></a><span class="co">#&gt; Number of iterations of the EM algorithm = 297</span></span>
+<span id="cb23-7"><a href="#cb23-7"></a><span class="co">#&gt; </span></span>
+<span id="cb23-8"><a href="#cb23-8"></a><span class="co">#&gt;  Results of the discrimination test DBB:</span></span>
+<span id="cb23-9"><a href="#cb23-9"></a><span class="co">#&gt;     sum(z2/n) sum(quasi_mu)    |D_bessel|      |D_beta| </span></span>
+<span id="cb23-10"><a href="#cb23-10"></a><span class="co">#&gt;        0.0853       52.6201        0.0004        0.0030 </span></span>
+<span id="cb23-11"><a href="#cb23-11"></a><span class="co">#&gt; </span></span>
+<span id="cb23-12"><a href="#cb23-12"></a><span class="co">#&gt;  Pearson residuals:</span></span>
+<span id="cb23-13"><a href="#cb23-13"></a><span class="co">#&gt;      RSS      Min       1Q   Median       3Q      Max </span></span>
+<span id="cb23-14"><a href="#cb23-14"></a><span class="co">#&gt; 331.9432  -1.7387  -0.6606  -0.3847   0.5562   4.5786 </span></span>
+<span id="cb23-15"><a href="#cb23-15"></a><span class="co">#&gt; </span></span>
+<span id="cb23-16"><a href="#cb23-16"></a><span class="co">#&gt;  Coefficients modeling the mean (with logit link):</span></span>
+<span id="cb23-17"><a href="#cb23-17"></a><span class="co">#&gt;             Estimate Std.error z-value Pr(&gt;|z|)    </span></span>
+<span id="cb23-18"><a href="#cb23-18"></a><span class="co">#&gt; (intercept) -1.15379   0.05251 -21.971  &lt; 2e-16 ***</span></span>
+<span id="cb23-19"><a href="#cb23-19"></a><span class="co">#&gt; priming     -0.25486   0.05733  -4.446 8.77e-06 ***</span></span>
+<span id="cb23-20"><a href="#cb23-20"></a><span class="co">#&gt; eliciting    0.33927   0.05846   5.804 6.49e-09 ***</span></span>
+<span id="cb23-21"><a href="#cb23-21"></a><span class="co">#&gt; </span></span>
+<span id="cb23-22"><a href="#cb23-22"></a><span class="co">#&gt;  Coefficients modeling the precision (with identity link):</span></span>
+<span id="cb23-23"><a href="#cb23-23"></a><span class="co">#&gt;             Estimate Std.error z-value Pr(&gt;|z|)    </span></span>
+<span id="cb23-24"><a href="#cb23-24"></a><span class="co">#&gt; (intercept)   4.9248    0.4493   10.96   &lt;2e-16 ***</span></span>
+<span id="cb23-25"><a href="#cb23-25"></a><span class="co">#&gt; g(phi) = 0.1316</span></span>
+<span id="cb23-26"><a href="#cb23-26"></a><span class="co">#&gt; ---</span></span>
+<span id="cb23-27"><a href="#cb23-27"></a><span class="co">#&gt;  Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</span></span>
+<span id="cb23-28"><a href="#cb23-28"></a><span class="co">#&gt; Percentage of residual within the envelope = 33.3333</span></span></code></pre></div>
+<p>The fitted <em>bbreg</em> object with simulated envelopes can be used to produce a quantile-quantile plot with simulated envelopes.</p>
+</div>
+<div id="diagnostic-plots-for-bbreg-objects" class="section level2">
+<h2>Diagnostic plots for <em>bbreg</em> objects</h2>
+<p>The <em>bbreg</em> package comes with a <em>plot</em> method that currently has four kinds of plots implemented: Residuals vs. Index; Q-Q Plot (if the fit contains simulated envelopes, the plot will be with the simulated envelopes); Fitted means vs. Response and Residuals vs. Fitted means.</p>
+<p>To produce all four plots, one may simply apply the <em>plot</em> method to the <em>bbreg</em> object:</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1"></a><span class="kw">plot</span>(fit)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAMAAAAjXV6yAAAAbFBMVEUAAAAAACsAAFUAK4AAVaorAAArACsrAFUrK4ArgNRVAABVACtVgIBVqqpVqv+AKwCAgFWAqoCAqv+A1P+qVQCqVSuqqlWq1ICq/6qq///UgCvU1IDU1P/U/6rU////qlX/1ID//6r//9T///8Lan+HAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAOCUlEQVR4nO2dDX+kKBKHySSTvc7sdmYvfXs73l3shO//HU8owELBkheV7tR/fpMYGgt4mtcSVUjWosTRGWhdDIgQAyLEgAgxIEIMiBADIsSACDEgQgyIEAMixIAIMSBCDIgQAyLEgAgxIEIMiBADIsSACDEgQgyIEAMixIAIMSBCDIgQAyLEgAgxIEIMiBADIsSACDEgQgyIEAMixIAIMSBCDIgQAyLEgAgxIEIMiBADIsSACDEgQgyIEAMixIAIMSBCDIgQAyLEgAgxIEIMiBADIsSACDEgQgyIEAMixIAIMSBCDIhQBUC9EOLhLRpwEVpPUn68nFEkdIzieYai8iwlKvHcYkCfr99+SXn9fooFXB7fdbYe33HW5tmEeN0qQiWAElUMqFM4FJBzJAAKLvuHtzWAPl5OktYNAXIFujxFAgygAZgulmp/p+EvISDcyQJSRe90JKmjifP4235gAH38+CmGr8PGVq304efwRfjBEyNwbm8N/fEClrcCdH02TaKHijMP8GtQr7P4FG9iCqtqZ6qN6lo4nGF/uw8soBd1jg2UlyHFXqh0cPDUiPmabDaGWIvNuhRQb43bg1mArRkayufrSc6amwEEnfkQGyrhANgytr/dBw7QCQVCo74o2zh4buQsUTZOuHsIaAdAUHBoGJAX29w8Ach+GO7gTB0JCmV/ow/OtqxjIBCw8KNG1Kd+NhZ7tN2amESAhoMYINVOekAq1DcN3Yf57T7wANnAzgcUMzICstlYCUjVtm7WdVIa++THd90r4oAYIFSDXAdr4w3F7L0+4WJr4sOb+2Beg6T9RvwaFDCSXYOGDF6/P7nBZ63U9/b5+vgfN++ZBniAlvogU4P8+dKYfVztMCAXCKXujO1FI3421gGyQ4xtGat10UBQzZsEeIDQ8DGd79g+6Gxmi7bG9ONv9wEG5ALRKIaDp0Ymo1gSIJVClwrItvbxPD/AB2QnIEPfPZ0HoaVGZ063ixa3eDEfeIBcbGXi219ujIsYmcyDEprYEywHEpuY07+mk4lZwC5KbgGEcCc98P18zeVzvHQftG6pkqB7cnf0QiwvG3JUGZC4GR0FqK65DWTYJAIa+h+nok6ueUAC/V99QuX0W5awPxlQWCWAbDO76yZWAkitNp+WfSMp5hpVfh+kZlj9MPvvEpfzEXPNKm8Uk8aP9Nsv/b8g+YJzd1U6IOUB+PjxxoCiEdUy/nK6+yZmlDPMX5R7pGwQu29Au6Z7tBgQoZxRrGAtlr5IPlrZNajQIXf/gJKvamSme7TyAZVVoS8AKP2qRla6RysbUP5VjbR099Z0/MgfxYom0s0Cmi3geR7kSaCfcna84tTKOWlOxYDu2mnv5q+FNagXZsdDUWZKTt5Guvup0AfZi8735u4wlafGKAbO6HubKM5bVzhg+XwpzZ4ivFslpn5hP/wdA4KtS8RO94sQp+s/3uM7atoC5BwM82zlDPN6KFusP6p2wW6/WE/VFCABvXPQCbPJPEjXG9jFOumpmvQHQXYiFwk3AqS6qc//ypuoQSOd3QCNK/3oPq52AAnTwuoAGgq8yuVquvA+uo+rJUCuD4p8vNpOTTUFSMa7Rd5htrRFIf5JJDIo71aEqLnjFRtThfuxyoo7yrwVIWauUYnJ79Un5N+KEDbXqMTsYPUZ+bciBM21rpwmVngrQlq6B8jrkrI66Qq3IrQMyNOXH+YnE6DZgPbVAQlBTAYz3R2P75eym2UaAWS8QCY3lRar/cNbpzrpIkJtABLCLlX1X8Eoq23ZA+VyVU6MrGG+LX+QMGvU6EpV5s6DFKA7mCjCNyWW+BTUINppv8rckbILeSrOamMg6IO6slv2jgM0vV1ObDKKrX3AUXm6tZV6S+GXmgfN4WwByF44LNMRgHL4FFx6LtMBgMJ86gOqc0f+UYBmmMizVpu3B0UbydPTraas+vOFOmlceVLSv39AgVqTkvjdAwo0qaS07x1Qcp8zM1A94iHm4umkd8sTA9UjHmIuns4BNUg/JG5xmF+xWXgnQMV8si770BMgeI5tyEpBVjMkJjPDHBPJEVf5WsmrQrsBEiKw+TnFRHLEdWux+M6gxHSLZGtQQXo5q/kaTy/bBVCN9pyzWK3x+K9dARXZSI54O4tV10UXGake8RBzwSSqDJhfAFChlYyI+pHmzTvtK824sjppNRFq/bJPrRlpvtO+7fvFRJUeWpZMFNu+9Gzn0MXp3GUNErV6aHmffVBNPvc3itkNCUcCqqGtAPl8bg/QHv6gqnxyADV7r4a5ZlH3S8jxKLZ8r4aozCdzHtTevRpirkqGkyM2ea/GZnyymlhz92oE8FSzn9VJN3avxpZ8bnweFEJTeRKRvxbbKd3I6cuqkEGXUnLEFrbg7UVH5i1WD96CtxMZm1pyxKOvauzLZ5tOepvNC/v1O16q1SMqRTcv5JnTJxxBR+bOg8gmVnfzwjFoTNrpEVe9V6Pe5oWjyNjkkyMWvVcjvXzH4smdB+3xXo2D+pxZNpIjrn+vxtKcm0h3kc6u93Nm9EGr36uRD0gEbqrYGYzLSkbEte/VSATkU5kDWpvTutpyNZ8GSF+PgH8joONvk24EkBCIj7md/Wg0JmcZEes/eUFIewe79NAYPkciylnNV3/ygld7UCtLzeMWyhvms5+84JuzEMwfPqXUDG6kvIlinScv2P/GttcnJ+dvK+XXoOInL+DaE87J4XRkQR9Uvv0FASp8EO+WyhzFamx/wYDa1ZGXfSINCz5vBdyh18WOngSuUTKgTlR5VftSuk1hSwWknoNc+JJeMHczSgMEy6uyDa4zo7U+qWwusR5DdLisWuXS4XIeGBCRBwZE5IEBEXlgQEQebhfQOP5VoHR/gCqLAWUbZUB3JwZEiAERYkCEGBAhBkSIARFiQIQYECEGRIgBEWJAhBgQoU0AdVmXsMP7a5feLB3ZkasfmRne5pSesy0AqS1G6e+t/3gJueqUnZit8BkDnyF+J0I3TWTkbANAepNa8s2vfdCXCRfswvfyh8+Q5gJoaCNYTs626oNSAfXiFHKJxwsbO8N9HKsojQBafi17UEFAoVdvL55hFX00bWLOtgHUxzrJxZMCRYJ6EKsNC4D6SAaSc7ZdE0u+0F8TUB/so3Nyttk8KH0Yq9jEYvUnI2d1AXXjBGT1Zhp3TmInHTkDTC41o7RtPhvUIMhA+mXa0BlLw3w0jehG1JycbdHE1E7ijAc5BDO+NFGMFPX6PZp0Rs426YMuImc/X7i4S4uD6BlKwbPSc8aLVUIMiBADIsSACDEgQgyIEAMitCGg8YlEf699ulV/Dj8Ja/3jsYyFOs/TUtq4BsFic212o/FWl9dGZECEhZsD9Pt3mOKPS3c4+PjxUzmWIVg90Prxfy82nlqhmqWBK69aePz5/Kb/1j9chD+GBn12FvRnNjH9oOxcYDsBUtcZzH+9llTPIVIP/VQP/5Qu2PUeKkB52NUyHo6hfMqP2g+rLAdojADWrQV9i7Kxqtfw2S/m2QnQSfsa4Kb8YYkJK+peFehk39w1BI/FgwW3ehqNLp8BZLxDIyAUwabgADmrbT2+dyLUBw0/wG8xlANKagokXbAtHnZp9UI4QFDUK25iOIKm4gAhqyWE9gVkxn0DyBRIumAH6Nm4KoZe5Nu/xxrUzQB5ESaArFW40tp4H4RrkLRtxa9BJh6uQfo3amKmUoyA/AihGmR1yb2de1dAbjBCfRAeo6Z9kG5S/djE4Fdnuq4BjB/BB+SP9Nnj/q6A4KKd+jLHUcwUWQercrtR7PP1CeqGOLniwcCknur8+D40nLMfwfTMeBRTVnVVSr/IYrQvID010R2JnQeZzsUEXybzIO1vvZiKJs1pvz+/6WXMH9AHjRH0uD+ZB0EVK3hgwg0uVl0XvosYECEGROgGAe0rBkSIARFiQIQYEKEIILeepveKfL7Wct4phzKh2YohcQkxWYLAUnDBhX39rRxQV+Ml2lr1/KQpSSymWgFQxVLdFiDlRT6hA897LLUz+OGnWnbqpZXbVmKCp7HNwfW7ch2frr6HGjuUZ9sHr89/ogz8rZ0hyAisTPX5KFP21HFG6ZIyTQwWe9pj4tzYASsLgJxD1/mLsffYeYdh95d1DSOnsRe7w9Y6Yd7SNbqiR4dyICfibBb/g0nwFiEjAMi4u12mZoCQ1xs7vbELO2hlAZB+JNW3X+7A9x5Dy7tYp7J1DU+CR1+zO+1kbGMPNXYoKykP4ADj+k+UE/OUWQDkGRkd0i71GSDs9fac3h6ggBWiD+of3tyB7z2GhtX7jgj7ert5bM8XbX94rmg8vvRwOQeam58B52+0P2zxtA/Rpm5qnvG4St/rjV2WPqCQlSigZ+PcdAe+97izVsyFBuMa7nxANrbvi3aAsCt67gP0crIKUIeL5tUgnBR2eocAdesALdUgKSdVxWU5VINwngM1SAY8spmA+jgglFSlGmRbPuoCsPcYXaE6Id/x7MIVIjAD5H8cBaQzcEEZiAJyqc8A4aTifVDAyvIoBkV2HmTsPfZHMeca9i99jrHtgVc25IoeHcrxnNCApqMYEkrKjWKfr08WVtQKMQ86o4OJ91j1ot/+UqbUX9Y17IKnsc2BD8iGYofyfB7kZWAZkMtUgJBLajIPkp4be2olCmidelu6eXA1JT8ftE7qfSEgnW1oEngthoJrKQFQndQ9K/k1qHdzDG81PwbXUkoNqpM6tlLYxL6CGBAhBkSIARFiQIQYECEGRIgBEWJAhBgQIQZEiAERYkCEGBAhBkSIARFiQIQYECEGRIgBEWJAhP4PZcreuqzgJr0AAAAASUVORK5CYII=" /><!-- --><img src="data:image/png;base64,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" /><!-- --><img src="data:image/png;base64,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" /><!-- --></p>
+<p>Notice that since there were no simulated envelopes for the <strong>fit</strong> object, the Q-Q plot does not contain simulated envelopes. Nevertheless, it contains a line connecting the first and third quartiles of the normal distribution (one can remove this line by setting the argument <em>qqline</em> to <em>FALSE</em>).</p>
+<p>To choose a specific plot, one can set the parameter <em>which</em> to a vector containing the numbers of the plots to be shown. The plot numbers are given by: Plot 1: Residuals vs. Index; Plot 2: Q-Q Plot (if the fit contains simulated envelopes, the plot will be with the simulated envelopes); Plot 3: Fitted means vs. Response; Plot 4: Residuals vs. Fitted means.</p>
+<p>For instance, if we only want to plot the Q-Q plot, we set the argument <em>which</em> to 2:</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1"></a><span class="kw">plot</span>(fit_envelope, <span class="dt">which =</span> <span class="dv">2</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>Notice that since the <strong>fit_envelope</strong> object contains simulated envelopes, the Q-Q plot is displayed with simulated envelopes.</p>
+<p>Finally, to avoid being asked between plots, just set the <em>ask</em> parameter to <em>FALSE</em>:</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1"></a><span class="kw">plot</span>(fit, <span class="dt">which =</span> <span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">4</span>), <span class="dt">ask =</span> <span class="ot">FALSE</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
