@@ -18,9 +18,10 @@ Function providing the fitted means for the model (bessel or beta).
 }
 \examples{
 \donttest{
-fit = bbreg(agreement ~ priming + eliciting, data = WT)
+fit <- bbreg(agreement ~ priming + eliciting, data = WT)
 fitted(fit)
-fitted(fit, type = "precision")}
+fitted(fit, type = "precision")
+}
 }
 \seealso{
 \code{\link{predict.bbreg}}, \code{\link{summary.bbreg}}, \code{\link{coef.bbreg}}, \code{\link{vcov.bbreg}}, \code{\link{plot.bbreg}}

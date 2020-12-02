@@ -18,9 +18,10 @@ Function to extract the coefficients of a fitted regression model (bessel or bet
 }
 \examples{
 \donttest{
-fit = bbreg(agreement ~ priming + eliciting, data = WT)
+fit <- bbreg(agreement ~ priming + eliciting, data = WT)
 coef(fit)
-coef(fit, parameters = "precision")}
+coef(fit, parameters = "precision")
+}
 }
 \seealso{
 \code{\link{fitted.bbreg}}, \code{\link{summary.bbreg}}, \code{\link{vcov.bbreg}}, \code{\link{plot.bbreg}}, \code{\link{predict.bbreg}}

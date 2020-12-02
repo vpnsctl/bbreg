@@ -16,8 +16,9 @@ Function providing a brief description of results related to the regression mode
 }
 \examples{
 \donttest{
-fit = bbreg(agreement ~ priming + eliciting, data = WT)
-fit}
+fit <- bbreg(agreement ~ priming + eliciting, data = WT)
+fit
+}
 }
 \seealso{
 \code{\link{fitted.bbreg}}, \code{\link{summary.bbreg}}, \code{\link{coef.bbreg}}, \code{\link{vcov.bbreg}}, \code{\link{plot.bbreg}}, \code{\link{predict.bbreg}}

@@ -25,11 +25,12 @@ Function to obtain various predictions based on the fitted model (bessel or beta
 }
 \examples{
 \donttest{
-fit = bbreg(agreement ~ priming + eliciting, data = WT)
+fit <- bbreg(agreement ~ priming + eliciting, data = WT)
 predict(fit)
-new_data_example = data.frame(priming = c(0,0,1), eliciting = c(0,1,1))
+new_data_example <- data.frame(priming = c(0, 0, 1), eliciting = c(0, 1, 1))
 predict(fit, new_data = new_data_example)
-predict(fit, new_data = new_data_example, type = "precision")}
+predict(fit, new_data = new_data_example, type = "precision")
+}
 }
 \seealso{
 \code{\link{fitted.bbreg}}, \code{\link{summary.bbreg}}, \code{\link{coef.bbreg}}, \code{\link{vcov.bbreg}}, \code{\link{plot.bbreg}}

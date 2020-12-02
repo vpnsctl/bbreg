@@ -16,8 +16,9 @@ Function providing a summary of results related to the regression model (bessel 
 }
 \examples{
 \donttest{
-fit = bbreg(agreement ~ priming + eliciting|priming, data = WT)
-summary(fit)}
+fit <- bbreg(agreement ~ priming + eliciting | priming, data = WT)
+summary(fit)
+}
 }
 \seealso{
 \code{\link{fitted.bbreg}}, \code{\link{plot.bbreg}}, \code{\link{predict.bbreg}}

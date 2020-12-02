@@ -14,7 +14,8 @@
 #' DOI:10.1037/1082-989X.11.1.54 (\href{https://psycnet.apa.org/record/2006-03820-004?doi=1}{Smithson and Verkuilen (2006)})
 #'
 #' @source Data can be obtained from the supplementary materials of \emph{Smithson and Verkuilen (2006)}. See also \emph{Barreto-Souza, Mayrink and Simas (2020)} for details.
-#' @examples data(SA)
+#' @examples
+#' data(SA)
 "SA"
 
 #############################################
@@ -36,7 +37,8 @@
 #' DOI:10.3102/1076998610396893 (\href{https://journals.sagepub.com/doi/abs/10.3102/1076998610396893?journalCode=jebb}{Smithson et al.; 2011})
 #'
 #' @source Data can be obtained from supplementary materials of \emph{Smithson et al. (2011)}. See also \emph{Barreto-Souza, Mayrink and Simas (2020)} for details.
-#' @examples data(WT)
+#' @examples
+#' data(WT)
 "WT"
 
 #############################################
@@ -71,5 +73,6 @@
 #' DOI:10.4236/ojs.2016.61010 (\href{https://www.scirp.org/journal/paperinforcitation.aspx?paperid=63650}{Brimacombe; 2016})
 #'
 #' @source Data is freely available from \emph{Penrose et al. (1985)}. See also \emph{Brimacombe (2016)} and \emph{Barreto-Souza, Mayrink and Simas (2020)} for details.
-#' @examples data(BF)
+#' @examples
+#' data(BF)
 "BF"

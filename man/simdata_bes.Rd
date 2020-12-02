@@ -31,10 +31,14 @@ Function to generate synthetic data from the bessel regression.
 Requires the R package "statmod" generate random numbers from the Inverse Gaussian distribution (\emph{Giner and Smyth, 2016}).
 }
 \examples{
-n = 100; x = cbind(rbinom(n, 1, 0.5), runif(n, -1, 1)); v = runif(n, -1, 1);
-z = simdata_bes(kap = c(1, -1, 0.5), lam = c(0.5, -0.5), x, v,
-repetitions = 1, link.mean = "logit", link.precision = "log")
-z = unlist(z)
+n <- 100
+x <- cbind(rbinom(n, 1, 0.5), runif(n, -1, 1))
+v <- runif(n, -1, 1)
+z <- simdata_bes(
+  kap = c(1, -1, 0.5), lam = c(0.5, -0.5), x, v,
+  repetitions = 1, link.mean = "logit", link.precision = "log"
+)
+z <- unlist(z)
 hist(z, xlim = c(0, 1), prob = TRUE)
 }
 \references{

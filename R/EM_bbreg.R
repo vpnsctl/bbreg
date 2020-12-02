@@ -19,10 +19,10 @@
 #' @param ptest proportion of the sample size to be considered in the test set for the \code{RSS_pred} analysis (default = 0.25 = 25\% of the sample size).
 #' If predict = 0, ptest is ignored.
 #' @param epsilon tolerance value to control the convergence criterion in the EM-algorithm (default = 10^(-5)).
-#' @param link.mean optionally, a string containing the link function for the mean. If omitted, the 'logit' link function will be used. 
+#' @param link.mean optionally, a string containing the link function for the mean. If omitted, the 'logit' link function will be used.
 #' The possible link functions for the mean are "logit","probit", "cauchit", "cloglog".
-#' @param link.precision optionally, a string containing the link function the precision parameter. If omitted and the only precision 
-#' covariate is the intercept, the identity link function will be used, if omitted and there is a precision covariate other than the 
+#' @param link.precision optionally, a string containing the link function the precision parameter. If omitted and the only precision
+#' covariate is the intercept, the identity link function will be used, if omitted and there is a precision covariate other than the
 #' intercept, the 'log' link function will be used. The possible link functions for the precision parameter are "identity", "log", "sqrt", "inverse".
 #' @return Object of class \pkg{bbreg} containing the outputs from the model fit (bessel or beta regression).
 #'
@@ -47,24 +47,24 @@
 #' is given by maximizing the beta model likelihood via \code{\link[stats]{optim}}.
 #' In terms of initial values, \pkg{bbreg} uses quasi-likelihood estimates as the starting points for
 #' the EM-algorithms. The formulation of the target model also has the same structure as in the standard functions \code{lm}, \code{glm} and \pkg{betareg},
-#' with also the same structure as the latter when precision covariates are being used. The user is supposed to 
-#' write a formula object describing elements of the regression (response, covariates for the mean submodel, 
-#' covariates for the precision submodel, presence of intercepts, and interactions). As an example, the description 
+#' with also the same structure as the latter when precision covariates are being used. The user is supposed to
+#' write a formula object describing elements of the regression (response, covariates for the mean submodel,
+#' covariates for the precision submodel, presence of intercepts, and interactions). As an example, the description
 #' "z ~ x" indicates: "response = z" (continuous and bounded by 0 and 1), "covariates = columns of x" (mean submodel) and
 #' precision submodel having only an intercept. On the other hand, the configuration "z ~ x | v" establishes that the covariates given
-#' in the columns of "v" must be used in the precision submodel. Intercepts may be removed by setting 
-#' "z ~ 0 + x | 0 + v" or "z ~ x - 1|v - 1". Absence of intercept and covariates is not allowed in any submodel. 
+#' in the columns of "v" must be used in the precision submodel. Intercepts may be removed by setting
+#' "z ~ 0 + x | 0 + v" or "z ~ x - 1|v - 1". Absence of intercept and covariates is not allowed in any submodel.
 #' The type of model to be fitted ("bessel" or "beta") can be specified through the argument "model" of
-#' \pkg{bbreg}. If the user does not specify the model, the package will automatically apply a discrimination 
+#' \pkg{bbreg}. If the user does not specify the model, the package will automatically apply a discrimination
 #' test (DBB - Discrimination between Bessel and Beta),
-#' developed in \emph{Barreto-Souza, Mayrink and Simas (2020)}, to select the most appropriate model for the given 
-#' data set. In this case, some quantities related to the DBB are included in the final output; they are: 
-#' "sum(Z2/n)" = mean of z_i^2, "sum(quasi_mu)" = sum (for i = 1,...,n) of muq_i + muq_i(1-muq_i)/2, 
-#' with muq_i being the quasi-likelihood estimator of mu_i and, finally, the quantities "|D_bessel|" and 
+#' developed in \emph{Barreto-Souza, Mayrink and Simas (2020)}, to select the most appropriate model for the given
+#' data set. In this case, some quantities related to the DBB are included in the final output; they are:
+#' "sum(Z2/n)" = mean of z_i^2, "sum(quasi_mu)" = sum (for i = 1,...,n) of muq_i + muq_i(1-muq_i)/2,
+#' with muq_i being the quasi-likelihood estimator of mu_i and, finally, the quantities "|D_bessel|" and
 #' "|D_beta|" depending on muq_i and the EM-estimates of phi_i under bessel or beta.
 #'
-#' In the current version, three types of residuals are available for analysis ("Pearson", "Score" and "Quantile"). 
-#' The user may choose one of them via the argument "residual". The score residual is computed empirically, based 
+#' In the current version, three types of residuals are available for analysis ("Pearson", "Score" and "Quantile").
+#' The user may choose one of them via the argument "residual". The score residual is computed empirically, based
 #' on 100 artificial data sets generated from the fitted model. The sample size
 #' is the same of the original data and the simulations are used to estimate the mean and s.d. required in the score
 #' residual formulation. The user
@@ -89,281 +89,363 @@
 #'
 #' @examples
 #' # Example with artificial data.
-#' n = 100; x = cbind(rbinom(n, 1, 0.5), runif(n, -1, 1)); v = runif(n, -1, 1);
-#' z = simdata_bes(kap = c(1, -1, 0.5), lam = c(0.5, -0.5), x, v,
-#' repetition = 1, link.mean = "logit", link.precision = "log")
-#' z = unlist(z)
-#' fit1 = bbreg(z ~ x | v)
+#' n <- 100
+#' x <- cbind(rbinom(n, 1, 0.5), runif(n, -1, 1))
+#' v <- runif(n, -1, 1)
+#' z <- simdata_bes(
+#'   kap = c(1, -1, 0.5), lam = c(0.5, -0.5), x, v,
+#'   repetition = 1, link.mean = "logit", link.precision = "log"
+#' )
+#' z <- unlist(z)
+#' fit1 <- bbreg(z ~ x | v)
 #' summary(fit1)
 #' plot(fit1)
 #'
 #' # Examples using the Weather Task (WT) data available in bbreg.
 #' \donttest{
-#' fit2 = bbreg(agreement ~ priming + eliciting, data = WT)
-#' summary(fit2)}
+#' fit2 <- bbreg(agreement ~ priming + eliciting, data = WT)
+#' summary(fit2)
+#' }
 #' \donttest{
-#' fit3 = bbreg(agreement ~ priming + eliciting, envelope = 30, predict = 10, data = WT)
-#' summary(fit3)}
+#' fit3 <- bbreg(agreement ~ priming + eliciting, envelope = 30, predict = 10, data = WT)
+#' summary(fit3)
+#' }
 #' # Example with precision covariates
 #' \donttest{
-#' fit4 = bbreg(agreement ~ priming + eliciting|eliciting, data = WT)
-#' summary(fit4)}
-#'# Example with different link functions:
+#' fit4 <- bbreg(agreement ~ priming + eliciting | eliciting, data = WT)
+#' summary(fit4)
+#' }
+#' # Example with different link functions:
 #' \donttest{
-#' fit5 = bbreg(agreement ~ priming + eliciting|eliciting, data = WT, 
-#' link.mean = "cloglog", link.precision = "sqrt")
-#' summary(fit5)}
+#' fit5 <- bbreg(agreement ~ priming + eliciting | eliciting,
+#'   data = WT,
+#'   link.mean = "cloglog", link.precision = "sqrt"
+#' )
+#' summary(fit5)
+#' }
 #' @export
-bbreg = function(formula,data,link.mean=c("logit","probit", "cauchit", "cloglog"),
-                 link.precision=c("identity", "log", "sqrt", "inverse"),
-                 model=NULL,residual=NULL,envelope=0,prob=0.95,predict=0,ptest=0.25,epsilon=10^(-5))
-{
+bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cloglog"),
+                  link.precision = c("identity", "log", "sqrt", "inverse"),
+                  model = NULL, residual = NULL, envelope = 0, prob = 0.95, predict = 0, ptest = 0.25, epsilon = 10^(-5)) {
   ## Processing call
   # If data is not provided, verify the current R workspace
-  if(missing(data)){ data = environment(formula) }
-  MF = match.call(expand.dots = FALSE)
-  arg_names = match(c("formula","data"), names(MF), nomatch=0)
-  MF = MF[c(1, arg_names)]
-  MF$drop.unused.levels = TRUE
+  if (missing(data)) {
+    data <- environment(formula)
+  }
+  MF <- match.call(expand.dots = FALSE)
+  arg_names <- match(c("formula", "data"), names(MF), nomatch = 0)
+  MF <- MF[c(1, arg_names)]
+  MF$drop.unused.levels <- TRUE
 
   ## Processing formula
-  Fo = as.Formula(formula)
-  if(length(Fo)[2] < 2){ Fo = as.Formula(stats::formula(Fo),~1)
-  }else{
-  if(length(Fo)[2] > 2){ Fo = Formula(stats::formula(Fo, rhs = 1:2))
-    warning("right hand side of formula should not have > 2 parts (ignoring 3rd and higher cases)") } }
-  MF$formula = Fo
+  Fo <- as.Formula(formula)
+  if (length(Fo)[2] < 2) {
+    Fo <- as.Formula(stats::formula(Fo), ~1)
+  } else {
+    if (length(Fo)[2] > 2) {
+      Fo <- Formula(stats::formula(Fo, rhs = 1:2))
+      warning("right hand side of formula should not have > 2 parts (ignoring 3rd and higher cases)")
+    }
+  }
+  MF$formula <- Fo
 
   ## Model.frame: Convert MF into a data matrix.
-  MF[[1]] = as.name("model.frame")
-  MF = eval(MF, parent.frame())
+  MF[[1]] <- as.name("model.frame")
+  MF <- eval(MF, parent.frame())
 
   ## Extract terms (covariate matrices and response vector)
   # MTerms = terms(Fo, data = data)
-  MTerms_x = stats::terms(Fo, data = data, rhs = 1)
-  MTerms_v = stats::delete.response(stats::terms(Fo, data = data, rhs = 2))
-  z = stats::model.response(MF,"numeric")
-  x = stats::model.matrix(MTerms_x, MF)
-  v = stats::model.matrix(MTerms_v, MF)
-  n = length(z)
-  nkap = ncol(x)
-  nlam = ncol(v)
-  if(nkap==0){
+  MTerms_x <- stats::terms(Fo, data = data, rhs = 1)
+  MTerms_v <- stats::delete.response(stats::terms(Fo, data = data, rhs = 2))
+  z <- stats::model.response(MF, "numeric")
+  x <- stats::model.matrix(MTerms_x, MF)
+  v <- stats::model.matrix(MTerms_v, MF)
+  n <- length(z)
+  nkap <- ncol(x)
+  nlam <- ncol(v)
+  if (nkap == 0) {
     stop("empty matrix x is not allowed")
-    }
-  if(nlam==0){
+  }
+  if (nlam == 0) {
     stop("empty matrix v is not allowed")
   }
 
   ## Validation of input variables and arguments.
-  if(n < 1){ stop("response variable is not provided") }
-  if(min(z) <= 0 & max(z) >= 1){ stop("requirement 0 < z_i < 1 is not true for all responses") }
+  if (n < 1) {
+    stop("response variable is not provided")
+  }
+  if (min(z) <= 0 & max(z) >= 1) {
+    stop("requirement 0 < z_i < 1 is not true for all responses")
+  }
   #
-  if(is.null(residual)==TRUE){ residual = "pearson" }
-  if(is.character(residual)==FALSE){ stop("residual must be a character (pearson, score or quantile)") }
-  if(is.character(residual)==TRUE){ residual = match.arg(residual,c("pearson","score","quantile")) }
+  if (is.null(residual) == TRUE) {
+    residual <- "pearson"
+  }
+  if (is.character(residual) == FALSE) {
+    stop("residual must be a character (pearson, score or quantile)")
+  }
+  if (is.character(residual) == TRUE) {
+    residual <- match.arg(residual, c("pearson", "score", "quantile"))
+  }
   #
-  if(is.numeric(envelope)==FALSE){ stop("argument envelope must be numeric (0 or positive interger)") }
-  if(envelope < 0 | envelope%%1!=0){ stop("consider 0 or positive integers for envelope") }
-  if(envelope > 0 & envelope < 10){ stop("number of simulations to build envelopes is too small (try at least envelope = 10)") }
-  if(is.numeric(prob)==FALSE){ stop("prob must be numeric in the interval (0,1)") }
-  if(prob <= 0 | prob >= 1){ stop("prob must be in the interval (0,1)") }
-  if(envelope==0 & prob!=0.95){ warning(paste0("prob = ",prob," is ignored since envelope = 0")) }
+  if (is.numeric(envelope) == FALSE) {
+    stop("argument envelope must be numeric (0 or positive interger)")
+  }
+  if (envelope < 0 | envelope %% 1 != 0) {
+    stop("consider 0 or positive integers for envelope")
+  }
+  if (envelope > 0 & envelope < 10) {
+    stop("number of simulations to build envelopes is too small (try at least envelope = 10)")
+  }
+  if (is.numeric(prob) == FALSE) {
+    stop("prob must be numeric in the interval (0,1)")
+  }
+  if (prob <= 0 | prob >= 1) {
+    stop("prob must be in the interval (0,1)")
+  }
+  if (envelope == 0 & prob != 0.95) {
+    warning(paste0("prob = ", prob, " is ignored since envelope = 0"))
+  }
   #
-  if(is.numeric(predict)==FALSE){ stop("argument predict must be numeric (0 or positive integer)") }
-  if(predict < 0 | predict%%1!=0){ stop("consider 0 or positive integers for predict") }
-  if(is.numeric(ptest)==FALSE){ stop("ptest must be numeric in the interval (0,1)") }
-  if(ptest <= 0 | ptest >= 1){ stop("ptest must be in the interval (0,1)") }
-  if(predict==0 & ptest!=0.25){ warning(paste0("ptest = ",ptest," is ignored since predict = 0")) }
+  if (is.numeric(predict) == FALSE) {
+    stop("argument predict must be numeric (0 or positive integer)")
+  }
+  if (predict < 0 | predict %% 1 != 0) {
+    stop("consider 0 or positive integers for predict")
+  }
+  if (is.numeric(ptest) == FALSE) {
+    stop("ptest must be numeric in the interval (0,1)")
+  }
+  if (ptest <= 0 | ptest >= 1) {
+    stop("ptest must be in the interval (0,1)")
+  }
+  if (predict == 0 & ptest != 0.25) {
+    warning(paste0("ptest = ", ptest, " is ignored since predict = 0"))
+  }
   #
-  if(epsilon < 0){ stop("consider epsilon > 0") }
+  if (epsilon < 0) {
+    stop("consider epsilon > 0")
+  }
 
   ## Set ntest (size of the test set) when "prediction > 0"
-  if(predict > 0){
-    ntest = round(ptest*n)
-    if(ntest==0 | ntest==n){
-      predict==0
-      warning("size of the test set is near 0 or n (RSS_pred is not calculated)") }
+  if (predict > 0) {
+    ntest <- round(ptest * n)
+    if (ntest == 0 | ntest == n) {
+      predict == 0
+      warning("size of the test set is near 0 or n (RSS_pred is not calculated)")
+    }
   }
 
   ## Check for intercepts:
-  intercept_x = attr(stats::terms(Fo,rhs=1), "intercept")
-  intercept_v = attr(stats::terms(Fo,rhs=2), "intercept")
-  intercept = c(intercept_x, intercept_v)
+  intercept_x <- attr(stats::terms(Fo, rhs = 1), "intercept")
+  intercept_v <- attr(stats::terms(Fo, rhs = 2), "intercept")
+  intercept <- c(intercept_x, intercept_v)
 
-  ##Checking and processing link functions
-  if(length(link.mean)>1){
-    link.mean = link.mean[1]
+  ## Checking and processing link functions
+  if (length(link.mean) > 1) {
+    link.mean <- link.mean[1]
   }
-  possible_link_mean = c("logit","probit", "cauchit", "cloglog")
+  possible_link_mean <- c("logit", "probit", "cauchit", "cloglog")
 
-  if(!(link.mean %in% possible_link_mean)){
+  if (!(link.mean %in% possible_link_mean)) {
     stop(paste0("link function for the mean must be one of ", possible_link_mean))
   }
 
-  if(length(link.precision)>1){
-    if(nlam==1 & intercept_v){
-      link.precision = link.precision[1]
-    } else{
-      link.precision = link.precision[2]
+  if (length(link.precision) > 1) {
+    if (nlam == 1 & intercept_v) {
+      link.precision <- link.precision[1]
+    } else {
+      link.precision <- link.precision[2]
     }
-
   }
-  possible_link_precision = c("identity", "log", "sqrt", "inverse")
+  possible_link_precision <- c("identity", "log", "sqrt", "inverse")
 
-  if(!(link.precision %in% possible_link_precision)){
+  if (!(link.precision %in% possible_link_precision)) {
     stop(paste0("link function for the precision parameter must be one of ", possible_link_precision))
   }
 
   ## Set initial values.
-  start = startvalues(z,x,v,link.mean)
-  kap = start[[1]]
-  lam = start[[2]]
-  start = c(kap,lam)
-  names(start) = c(paste0("kappa[",1:nkap,"]"),paste0("lambda[",1:nlam,"]"))
+  start <- startvalues(z, x, v, link.mean)
+  kap <- start[[1]]
+  lam <- start[[2]]
+  start <- c(kap, lam)
+  names(start) <- c(paste0("kappa[", 1:nkap, "]"), paste0("lambda[", 1:nlam, "]"))
 
   ## EM algorithm
-  if(is.character(model)==TRUE){
-    aux = match.arg(model,c("bessel","beta"))
-    if(aux=="bessel"){
-      modelname = "Bessel regression"
-      message = paste0(modelname," via EM - Ignoring the Discrimination test (DBB)")
-      inits = list(kap,lam)
-      EM = EMrun_bes(kap,lam,z,x,v,epsilon,link.mean,link.precision)
+  if (is.character(model) == TRUE) {
+    aux <- match.arg(model, c("bessel", "beta"))
+    if (aux == "bessel") {
+      modelname <- "Bessel regression"
+      message <- paste0(modelname, " via EM - Ignoring the Discrimination test (DBB)")
+      inits <- list(kap, lam)
+      EM <- EMrun_bes(kap, lam, z, x, v, epsilon, link.mean, link.precision)
 
-      niter = EM[[3]] # number of iterations of the EM algorithm
-      Est = EM[[1]] # coefficients
-      kap = Est[1:nkap]
-      lam = Est[-(1:nkap)]
-      mu = as.numeric(EM[[2]][,1]) # mu
-      gphi = as.numeric(EM[[2]][,2]) # g(phi)
-      if(residual=="pearson"){ res = (z-mu)/sqrt(gphi*mu*(1-mu)) }
-      if(residual=="score"){ res = score_residual_bes(kap,lam,z,x,v,link.mean,link.precision) }
-      if(residual=="quantile"){ res = quantile_residual_bes(kap,lam,z,x,v,link.mean,link.precision) }
-      RSS = sum(res^2)
-      SEr = infmat_bes(Est,z,x,v,link.mean,link.precision) # standard errors
-      DBB = NULL
-      Env = NULL
-      if(envelope>0){
-        Env = envelope_bes(residual,Est[1:nkap],Est[-(1:nkap)],x,v,envelope,prob,n,epsilon,link.mean,link.precision)
-        # % of residuals inside the envelope
-        Env_prop = 100*sum(sort(res) < Env[1,] & sort(res) > Env[3,])/n
+      niter <- EM[[3]] # number of iterations of the EM algorithm
+      Est <- EM[[1]] # coefficients
+      kap <- Est[1:nkap]
+      lam <- Est[-(1:nkap)]
+      mu <- as.numeric(EM[[2]][, 1]) # mu
+      gphi <- as.numeric(EM[[2]][, 2]) # g(phi)
+      if (residual == "pearson") {
+        res <- (z - mu) / sqrt(gphi * mu * (1 - mu))
       }
-      RSS_pred = NULL
-      if(predict>0){ RSS_pred = pred_accuracy_bes(residual,kap,lam,z,x,v,ntest,predict,epsilon,link.mean,link.precision) }
-      rm("EM","Est")
+      if (residual == "score") {
+        res <- score_residual_bes(kap, lam, z, x, v, link.mean, link.precision)
+      }
+      if (residual == "quantile") {
+        res <- quantile_residual_bes(kap, lam, z, x, v, link.mean, link.precision)
+      }
+      RSS <- sum(res^2)
+      SEr <- infmat_bes(Est, z, x, v, link.mean, link.precision) # standard errors
+      DBB <- NULL
+      Env <- NULL
+      if (envelope > 0) {
+        Env <- envelope_bes(residual, Est[1:nkap], Est[-(1:nkap)], x, v, envelope, prob, n, epsilon, link.mean, link.precision)
+        # % of residuals inside the envelope
+        Env_prop <- 100 * sum(sort(res) < Env[1, ] & sort(res) > Env[3, ]) / n
+      }
+      RSS_pred <- NULL
+      if (predict > 0) {
+        RSS_pred <- pred_accuracy_bes(residual, kap, lam, z, x, v, ntest, predict, epsilon, link.mean, link.precision)
+      }
+      rm("EM", "Est")
     }
-    if(aux=="beta"){
-      modelname = "Beta regression"
-      message = paste0(modelname," via EM - Ignoring the Discrimination test (DBB)")
-      EM = EMrun_bet(kap,lam,z,x,v,epsilon,link.mean,link.precision)
-      niter = EM[[3]] # number of iterations of the EM algorithm
-      Est = EM[[1]] # coefficients
-      kap = Est[1:nkap]
-      lam = Est[-(1:nkap)]
-      mu = as.numeric(EM[[2]][,1]) # mu
-      gphi = as.numeric(EM[[2]][,2]) # g(phi)
-      if(residual=="pearson"){ res = (z-mu)/sqrt(gphi*mu*(1-mu)) }
-      if(residual=="score"){ res = score_residual_bet(kap,lam,z,x,v,link.mean,link.precision) }
-      if(residual=="quantile"){ res = quantile_residual_bet(kap,lam,z,x,v,link.mean,link.precision) }
-      RSS = sum(res^2)
-      SEr = infmat_bet(Est,z,x,v,link.mean,link.precision) # standard errors
-      DBB = NULL
-      Env = NULL
-      if(envelope>0){
-        Env = envelope_bet(residual,kap,lam,x,v,envelope,prob,n,epsilon,link.mean,link.precision)
-        # % of residuals inside the envelope
-        Env_prop = 100*sum(sort(res) < Env[1,] & sort(res) > Env[3,])/n
+    if (aux == "beta") {
+      modelname <- "Beta regression"
+      message <- paste0(modelname, " via EM - Ignoring the Discrimination test (DBB)")
+      EM <- EMrun_bet(kap, lam, z, x, v, epsilon, link.mean, link.precision)
+      niter <- EM[[3]] # number of iterations of the EM algorithm
+      Est <- EM[[1]] # coefficients
+      kap <- Est[1:nkap]
+      lam <- Est[-(1:nkap)]
+      mu <- as.numeric(EM[[2]][, 1]) # mu
+      gphi <- as.numeric(EM[[2]][, 2]) # g(phi)
+      if (residual == "pearson") {
+        res <- (z - mu) / sqrt(gphi * mu * (1 - mu))
       }
-      RSS_pred = NULL
-      if(predict>0){ RSS_pred = pred_accuracy_bet(residual,kap,lam,z,x,v,ntest,predict,epsilon,link.mean,link.precision) }
-      rm("EM","Est")
+      if (residual == "score") {
+        res <- score_residual_bet(kap, lam, z, x, v, link.mean, link.precision)
+      }
+      if (residual == "quantile") {
+        res <- quantile_residual_bet(kap, lam, z, x, v, link.mean, link.precision)
+      }
+      RSS <- sum(res^2)
+      SEr <- infmat_bet(Est, z, x, v, link.mean, link.precision) # standard errors
+      DBB <- NULL
+      Env <- NULL
+      if (envelope > 0) {
+        Env <- envelope_bet(residual, kap, lam, x, v, envelope, prob, n, epsilon, link.mean, link.precision)
+        # % of residuals inside the envelope
+        Env_prop <- 100 * sum(sort(res) < Env[1, ] & sort(res) > Env[3, ]) / n
+      }
+      RSS_pred <- NULL
+      if (predict > 0) {
+        RSS_pred <- pred_accuracy_bet(residual, kap, lam, z, x, v, ntest, predict, epsilon, link.mean, link.precision)
+      }
+      rm("EM", "Est")
     }
   }
-  if(is.null(model)){
+  if (is.null(model)) {
     # run the discrimination
-    aux = dbbtest(formula,data,epsilon,link.mean,link.precision)
+    aux <- dbbtest(formula, data, epsilon, link.mean, link.precision)
     # fit the chosen model
-    if(aux[[2]]=="bessel"){
-      modelname = "Bessel regression"
-      message = paste0(modelname," via EM - Model selected via Discrimination test (DBB)")
-      EM = EMrun_bes(kap,lam,z,x,v,epsilon,link.mean,link.precision)
-      niter = EM[[3]] # number of iterations of the EM algorithm
-      Est = EM[[1]] # coefficients
-      kap = Est[1:nkap]
-      lam = Est[-(1:nkap)]
-      mu = as.numeric(EM[[2]][,1]) # mu
-      gphi = as.numeric(EM[[2]][,2]) # g(phi)
-      if(residual=="pearson"){ res = (z-mu)/sqrt(gphi*mu*(1-mu)) }
-      if(residual=="score"){ res = score_residual_bes(kap,lam,z,x,v,link.mean,link.precision) }
-      if(residual=="quantile"){ res = quantile_residual_bes(kap,lam,z,x,v,link.mean,link.precision) }
-      RSS = sum(res^2)
-      SEr = infmat_bes(Est,z,x,v,link.mean, link.precision) # standard errors
-      DBB = aux[[1]]
-      Env = NULL
-      if(envelope>0){
-        Env = envelope_bes(residual,kap,lam,x,v,envelope,prob,n,epsilon,link.mean,link.precision)
-        # % of residuals inside the envelope
-        Env_prop = 100*sum(sort(res) < Env[1,] & sort(res) > Env[3,])/n
+    if (aux[[2]] == "bessel") {
+      modelname <- "Bessel regression"
+      message <- paste0(modelname, " via EM - Model selected via Discrimination test (DBB)")
+      EM <- EMrun_bes(kap, lam, z, x, v, epsilon, link.mean, link.precision)
+      niter <- EM[[3]] # number of iterations of the EM algorithm
+      Est <- EM[[1]] # coefficients
+      kap <- Est[1:nkap]
+      lam <- Est[-(1:nkap)]
+      mu <- as.numeric(EM[[2]][, 1]) # mu
+      gphi <- as.numeric(EM[[2]][, 2]) # g(phi)
+      if (residual == "pearson") {
+        res <- (z - mu) / sqrt(gphi * mu * (1 - mu))
       }
-      RSS_pred = NULL
-      if(predict>0){ RSS_pred = pred_accuracy_bes(residual,kap,lam,z,x,v,ntest,predict,epsilon,link.mean,link.precision) }
-      rm("EM","Est")
+      if (residual == "score") {
+        res <- score_residual_bes(kap, lam, z, x, v, link.mean, link.precision)
+      }
+      if (residual == "quantile") {
+        res <- quantile_residual_bes(kap, lam, z, x, v, link.mean, link.precision)
+      }
+      RSS <- sum(res^2)
+      SEr <- infmat_bes(Est, z, x, v, link.mean, link.precision) # standard errors
+      DBB <- aux[[1]]
+      Env <- NULL
+      if (envelope > 0) {
+        Env <- envelope_bes(residual, kap, lam, x, v, envelope, prob, n, epsilon, link.mean, link.precision)
+        # % of residuals inside the envelope
+        Env_prop <- 100 * sum(sort(res) < Env[1, ] & sort(res) > Env[3, ]) / n
+      }
+      RSS_pred <- NULL
+      if (predict > 0) {
+        RSS_pred <- pred_accuracy_bes(residual, kap, lam, z, x, v, ntest, predict, epsilon, link.mean, link.precision)
+      }
+      rm("EM", "Est")
     }
-    if(aux[[2]]=="beta"){
-      modelname = "Beta regression"
-      message = paste0(modelname," via EM - Model selected via Discrimination test (DBB)")
-      EM = EMrun_bet(kap,lam,z,x,v,epsilon,link.mean,link.precision)
-      niter = EM[[3]] # number of iterations of the EM algorithm
-      Est = EM[[1]] # coefficients
-      kap = Est[1:nkap]
-      lam = Est[-(1:nkap)]
-      mu = as.numeric(EM[[2]][,1]) # mu
-      gphi = as.numeric(EM[[2]][,2]) # g(phi)
-      if(residual=="pearson"){ res = (z-mu)/sqrt(gphi*mu*(1-mu)) }
-      if(residual=="score"){ res = score_residual_bet(kap,lam,z,x,v,link.mean,link.precision) }
-      if(residual=="quantile"){ res = quantile_residual_bet(kap,lam,z,x,v,link.mean,link.precision) }
-      RSS = sum(res^2)
-      SEr = infmat_bet(Est,z,x,v,link.mean,link.precision) # standard errors
-      DBB = aux[[1]]
-      Env = NULL
-      if(envelope>0){
-        Env = envelope_bet(residual,kap,lam,x,v,envelope,prob,n,epsilon,link.mean,link.precision)
-        # % of residuals inside the envelope
-        Env_prop = 100*sum(sort(res) < Env[1,] & sort(res) > Env[3,])/n
+    if (aux[[2]] == "beta") {
+      modelname <- "Beta regression"
+      message <- paste0(modelname, " via EM - Model selected via Discrimination test (DBB)")
+      EM <- EMrun_bet(kap, lam, z, x, v, epsilon, link.mean, link.precision)
+      niter <- EM[[3]] # number of iterations of the EM algorithm
+      Est <- EM[[1]] # coefficients
+      kap <- Est[1:nkap]
+      lam <- Est[-(1:nkap)]
+      mu <- as.numeric(EM[[2]][, 1]) # mu
+      gphi <- as.numeric(EM[[2]][, 2]) # g(phi)
+      if (residual == "pearson") {
+        res <- (z - mu) / sqrt(gphi * mu * (1 - mu))
       }
-      RSS_pred = NULL
-      if(predict>0){ RSS_pred = pred_accuracy_bet(residual,kap,lam,z,x,v,ntest,predict,epsilon,link.mean,link.precision) }
-      rm("EM","Est")
+      if (residual == "score") {
+        res <- score_residual_bet(kap, lam, z, x, v, link.mean, link.precision)
+      }
+      if (residual == "quantile") {
+        res <- quantile_residual_bet(kap, lam, z, x, v, link.mean, link.precision)
+      }
+      RSS <- sum(res^2)
+      SEr <- infmat_bet(Est, z, x, v, link.mean, link.precision) # standard errors
+      DBB <- aux[[1]]
+      Env <- NULL
+      if (envelope > 0) {
+        Env <- envelope_bet(residual, kap, lam, x, v, envelope, prob, n, epsilon, link.mean, link.precision)
+        # % of residuals inside the envelope
+        Env_prop <- 100 * sum(sort(res) < Env[1, ] & sort(res) > Env[3, ]) / n
+      }
+      RSS_pred <- NULL
+      if (predict > 0) {
+        RSS_pred <- pred_accuracy_bet(residual, kap, lam, z, x, v, ntest, predict, epsilon, link.mean, link.precision)
+      }
+      rm("EM", "Est")
     }
   }
   ###############
-  object = list()
-  object$call = Fo
-  object$modelname = modelname
-  object$message = message
-  object$residualname = residual
-  object$niter = niter
-  object$start = start
-  object$intercept = intercept
-  object$link.mean = link.mean
-  object$link.precision = link.precision
-  object$kappa = kap
-  object$lambda = lam
-  object$mu = mu
-  object$x = x
-  object$v = v
-  object$z = z
-  object$gphi = gphi
-  object$residuals = as.numeric(res)
-  object$RSS = RSS
-  object$std_errors = SEr
-  object$DBB = DBB
-  object$envelope = Env
-  if(is.null(Env)==FALSE){ object$envelope_prop = Env_prop }
-  object$RSS_pred = RSS_pred
+  object <- list()
+  object$call <- Fo
+  object$modelname <- modelname
+  object$message <- message
+  object$residualname <- residual
+  object$niter <- niter
+  object$start <- start
+  object$intercept <- intercept
+  object$link.mean <- link.mean
+  object$link.precision <- link.precision
+  object$kappa <- kap
+  object$lambda <- lam
+  object$mu <- mu
+  object$x <- x
+  object$v <- v
+  object$z <- z
+  object$gphi <- gphi
+  object$residuals <- as.numeric(res)
+  object$RSS <- RSS
+  object$std_errors <- SEr
+  object$DBB <- DBB
+  object$envelope <- Env
+  if (is.null(Env) == FALSE) {
+    object$envelope_prop <- Env_prop
+  }
+  object$RSS_pred <- RSS_pred
   ###############
-  class(object) = "bbreg"
+  class(object) <- "bbreg"
   return(object)
 }
-

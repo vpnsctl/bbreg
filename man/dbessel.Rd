@@ -20,9 +20,12 @@ scalar expressing the value of the density at z.
 Function to calculate the probability density of the bessel distribution.
 }
 \examples{
-z = seq(0.01, 0.99, 0.01); np = length(z);
-density = rep(0, np)
-for(i in 1:np){ density[i] = dbessel(z[i], 0.5, 1) }
+z <- seq(0.01, 0.99, 0.01)
+np <- length(z)
+density <- rep(0, np)
+for (i in 1:np) {
+  density[i] <- dbessel(z[i], 0.5, 1)
+}
 plot(z, density, type = "l", lwd = 2, cex.lab = 2, cex.axis = 2)
 }
 \seealso{

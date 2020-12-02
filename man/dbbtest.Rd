@@ -32,8 +32,10 @@ Function to run the discrimination test between beta and bessel regressions (DBB
 }
 \examples{
 # Illustration using the Weather task data set available in the bbreg package.
-dbbtest(agreement ~ priming + eliciting, data = WT,
-link.mean = "logit", link.precision = "identity")
+dbbtest(agreement ~ priming + eliciting,
+  data = WT,
+  link.mean = "logit", link.precision = "identity"
+)
 }
 \seealso{
 \code{\link{simdata_bes}}, \code{\link{dbessel}}, \code{\link{simdata_bet}}

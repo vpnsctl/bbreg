@@ -111,30 +111,40 @@ proportion \code{ptest} for the test set (large \code{ptest} is not recommended)
 }
 \examples{
 # Example with artificial data.
-n = 100; x = cbind(rbinom(n, 1, 0.5), runif(n, -1, 1)); v = runif(n, -1, 1);
-z = simdata_bes(kap = c(1, -1, 0.5), lam = c(0.5, -0.5), x, v,
-repetition = 1, link.mean = "logit", link.precision = "log")
-z = unlist(z)
-fit1 = bbreg(z ~ x | v)
+n <- 100
+x <- cbind(rbinom(n, 1, 0.5), runif(n, -1, 1))
+v <- runif(n, -1, 1)
+z <- simdata_bes(
+  kap = c(1, -1, 0.5), lam = c(0.5, -0.5), x, v,
+  repetition = 1, link.mean = "logit", link.precision = "log"
+)
+z <- unlist(z)
+fit1 <- bbreg(z ~ x | v)
 summary(fit1)
 plot(fit1)
 
 # Examples using the Weather Task (WT) data available in bbreg.
 \donttest{
-fit2 = bbreg(agreement ~ priming + eliciting, data = WT)
-summary(fit2)}
+fit2 <- bbreg(agreement ~ priming + eliciting, data = WT)
+summary(fit2)
+}
 \donttest{
-fit3 = bbreg(agreement ~ priming + eliciting, envelope = 30, predict = 10, data = WT)
-summary(fit3)}
+fit3 <- bbreg(agreement ~ priming + eliciting, envelope = 30, predict = 10, data = WT)
+summary(fit3)
+}
 # Example with precision covariates
 \donttest{
-fit4 = bbreg(agreement ~ priming + eliciting|eliciting, data = WT)
-summary(fit4)}
+fit4 <- bbreg(agreement ~ priming + eliciting | eliciting, data = WT)
+summary(fit4)
+}
 # Example with different link functions:
 \donttest{
-fit5 = bbreg(agreement ~ priming + eliciting|eliciting, data = WT, 
-link.mean = "cloglog", link.precision = "sqrt")
-summary(fit5)}
+fit5 <- bbreg(agreement ~ priming + eliciting | eliciting,
+  data = WT,
+  link.mean = "cloglog", link.precision = "sqrt"
+)
+summary(fit5)
+}
 }
 \references{
 arXiv:2003.05157 (\href{https://arxiv.org/abs/2003.05157}{Barreto-Souza, Mayrink and Simas; 2020})

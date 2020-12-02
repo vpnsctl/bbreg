@@ -29,14 +29,19 @@ Function to build useful plots for bounded regression models.
 }
 \examples{
 \donttest{
-n = 100; x = cbind(rbinom(n, 1, 0.5), runif(n, -1, 1)); v = runif(n, -1, 1);
-z = simdata_bes(kap = c(1, 1, -0.5), lam = c(0.5, -0.5), x, v, repetitions = 1,
-link.mean = "logit", link.precision = "log")
-z = unlist(z)
-fit = bbreg(z ~ x | v, envelope = 10)
+n <- 100
+x <- cbind(rbinom(n, 1, 0.5), runif(n, -1, 1))
+v <- runif(n, -1, 1)
+z <- simdata_bes(
+  kap = c(1, 1, -0.5), lam = c(0.5, -0.5), x, v, repetitions = 1,
+  link.mean = "logit", link.precision = "log"
+)
+z <- unlist(z)
+fit <- bbreg(z ~ x | v, envelope = 10)
 plot(fit)
 plot(fit, which = 2)
-plot(fit, which = c(1,4), ask = FALSE)}
+plot(fit, which = c(1, 4), ask = FALSE)
+}
 }
 \seealso{
 \code{\link{summary.bbreg}}, \code{\link{coef.bbreg}}, \code{\link{vcov.bbreg}}, \code{\link{fitted.bbreg}}, \code{\link{predict.bbreg}}

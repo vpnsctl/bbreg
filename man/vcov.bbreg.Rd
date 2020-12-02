@@ -18,9 +18,10 @@ Function to extract the variance-covariance matrix of the parameters of the fitt
 }
 \examples{
 \donttest{
-fit = bbreg(agreement ~ priming + eliciting|priming, data = WT)
+fit <- bbreg(agreement ~ priming + eliciting | priming, data = WT)
 vcov(fit)
-vcov(fit, parameters = "precision")}
+vcov(fit, parameters = "precision")
+}
 }
 \seealso{
 \code{\link{infmat_bes}}, \code{\link{infmat_bet}}

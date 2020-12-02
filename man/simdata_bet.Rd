@@ -30,10 +30,14 @@ a list of response vectors z (with 0 < z_i < 1).
 Function to generate synthetic data from the beta regression.
 }
 \examples{
-n = 100; x = cbind(rbinom(n, 1, 0.5), runif(n, -1, 1)); v = runif(n, -1, 1);
-z = simdata_bet(kap = c(1, -1, 0.5), lam = c(0.5,- 0.5), x, v, repetitions = 1,
-link.mean = "logit", link.precision = "log")
-z = unlist(z)
+n <- 100
+x <- cbind(rbinom(n, 1, 0.5), runif(n, -1, 1))
+v <- runif(n, -1, 1)
+z <- simdata_bet(
+  kap = c(1, -1, 0.5), lam = c(0.5, -0.5), x, v, repetitions = 1,
+  link.mean = "logit", link.precision = "log"
+)
+z <- unlist(z)
 hist(z, xlim = c(0, 1), prob = TRUE)
 }
 \seealso{
