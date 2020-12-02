@@ -1,2 +1,4 @@
 ^\.github$
 ^\.travis\.yml$
+^.*\.Rproj$
+^\.Rproj\.user$
