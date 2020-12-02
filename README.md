@@ -1,6 +1,5 @@
 # The *bbreg* package
 
---- 
 ### CRAN badges
 
 [![](https://www.r-pkg.org/badges/version/bbreg?color=green)](https://cran.r-project.org/package=bbreg)
