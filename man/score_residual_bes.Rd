@@ -32,7 +32,7 @@ score_residual_bes(
 The possible link functions for the mean are "logit","probit", "cauchit", "cloglog".}
 
 \item{link.precision}{a string containing the link function the precision parameter.
-The possible link functions for the precision parameter are "identity", "log", "sqrt", "inverse".}
+The possible link functions for the precision parameter are "identity", "log", "sqrt".}
 }
 \value{
 Vector containing the score residuals.

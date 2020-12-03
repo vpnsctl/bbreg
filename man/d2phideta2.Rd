@@ -8,7 +8,7 @@ d2phideta2(link.precision, phi)
 }
 \arguments{
 \item{link.precision}{a string containing the link function the precision parameter.
-The possible link functions for the precision parameter are "identity", "log", "sqrt", "inverse".}
+The possible link functions for the precision parameter are "identity", "log", "sqrt".}
 
 \item{phi}{precision parameter.}
 }

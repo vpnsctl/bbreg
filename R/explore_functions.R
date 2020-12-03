@@ -562,7 +562,7 @@ d2mudeta2 <- function(link.mean, mu) {
 #' @title d2phideta2
 #' @description Function to obtain the second derivatives of the precision parameter with respect to the linear predictor.
 #' @param link.precision a string containing the link function the precision parameter.
-#' The possible link functions for the precision parameter are "identity", "log", "sqrt", "inverse".
+#' The possible link functions for the precision parameter are "identity", "log", "sqrt".
 #' @param phi precision parameter.
 
 d2phideta2 <- function(link.precision, phi) {

@@ -20,7 +20,7 @@ dbbtest(formula, data, epsilon = 10^(-5), link.mean, link.precision)
 The possible link functions for the mean are "logit","probit", "cauchit", "cloglog".}
 
 \item{link.precision}{a string containing the link function the precision parameter.
-The possible link functions for the precision parameter are "identity", "log", "sqrt", "inverse".}
+The possible link functions for the precision parameter are "identity", "log", "sqrt".}
 }
 \value{
 Object of class dbbtest, which is a list containing two elements. The 1st one is a table of terms

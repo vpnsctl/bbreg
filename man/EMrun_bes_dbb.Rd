@@ -18,7 +18,7 @@ EMrun_bes_dbb(lam, z, v, mu, epsilon, link.precision)
 \item{epsilon}{tolerance to controll convergence criterion.}
 
 \item{link.precision}{a string containing the link function the precision parameter.
-The possible link functions for the precision parameter are "identity", "log", "sqrt", "inverse".}
+The possible link functions for the precision parameter are "identity", "log", "sqrt".}
 }
 \value{
 Vector containing the estimates for lam in the bessel regression.

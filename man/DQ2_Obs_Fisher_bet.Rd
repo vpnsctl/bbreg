@@ -19,7 +19,7 @@ DQ2_Obs_Fisher_bet(theta, z, x, v, link.mean, link.precision)
 The possible link functions for the mean are "logit","probit", "cauchit", "cloglog".}
 
 \item{link.precision}{a string containing the link function the precision parameter.
-The possible link functions for the precision parameter are "identity", "log", "sqrt", "inverse".}
+The possible link functions for the precision parameter are "identity", "log", "sqrt".}
 }
 \value{
 matrix given by the conditional expectation of the gradient of the Q-function and its tranpose.

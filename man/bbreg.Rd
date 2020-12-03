@@ -8,7 +8,7 @@ bbreg(
   formula,
   data,
   link.mean = c("logit", "probit", "cauchit", "cloglog"),
-  link.precision = c("identity", "log", "sqrt", "inverse"),
+  link.precision = c("identity", "log", "sqrt"),
   model = NULL,
   residual = NULL,
   envelope = 0,
@@ -31,7 +31,7 @@ The possible link functions for the mean are "logit","probit", "cauchit", "clogl
 
 \item{link.precision}{optionally, a string containing the link function the precision parameter. If omitted and the only precision
 covariate is the intercept, the identity link function will be used, if omitted and there is a precision covariate other than the
-intercept, the 'log' link function will be used. The possible link functions for the precision parameter are "identity", "log", "sqrt", "inverse".}
+intercept, the 'log' link function will be used. The possible link functions for the precision parameter are "identity", "log", "sqrt".}
 
 \item{model}{character ("bessel" or "beta") indicating the type of model to be fitted. The default is NULL,
 meaning that a discrimination test must be applied to select the model.}

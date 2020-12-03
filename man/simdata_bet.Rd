@@ -21,7 +21,7 @@ simdata_bet(kap, lam, x, v, repetitions = 1, link.mean, link.precision)
 The possible link functions for the mean are "logit","probit", "cauchit", "cloglog".}
 
 \item{link.precision}{a string containing the link function the precision parameter.
-The possible link functions for the precision parameter are "identity", "log", "sqrt", "inverse".}
+The possible link functions for the precision parameter are "identity", "log", "sqrt".}
 }
 \value{
 a list of response vectors z (with 0 < z_i < 1).

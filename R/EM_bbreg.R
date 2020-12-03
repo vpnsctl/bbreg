@@ -23,7 +23,7 @@
 #' The possible link functions for the mean are "logit","probit", "cauchit", "cloglog".
 #' @param link.precision optionally, a string containing the link function the precision parameter. If omitted and the only precision
 #' covariate is the intercept, the identity link function will be used, if omitted and there is a precision covariate other than the
-#' intercept, the 'log' link function will be used. The possible link functions for the precision parameter are "identity", "log", "sqrt", "inverse".
+#' intercept, the 'log' link function will be used. The possible link functions for the precision parameter are "identity", "log", "sqrt".
 #' @return Object of class \pkg{bbreg} containing the outputs from the model fit (bessel or beta regression).
 #'
 #' @details The bessel regression originates from a class of normalized inverse-Gaussian (N-IG) process introduced in \emph{Lijoi et al. (2005)}
@@ -125,7 +125,7 @@
 #' }
 #' @export
 bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cloglog"),
-                  link.precision = c("identity", "log", "sqrt", "inverse"),
+                  link.precision = c("identity", "log", "sqrt"),
                   model = NULL, residual = NULL, envelope = 0, prob = 0.95, predict = 0, ptest = 0.25, epsilon = 10^(-5)) {
   ## Processing call
   # If data is not provided, verify the current R workspace
@@ -258,7 +258,7 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
       link.precision <- link.precision[2]
     }
   }
-  possible_link_precision <- c("identity", "log", "sqrt", "inverse")
+  possible_link_precision <- c("identity", "log", "sqrt")
 
   if (!(link.precision %in% possible_link_precision)) {
     stop(paste0("link function for the precision parameter must be one of ", possible_link_precision))
@@ -429,6 +429,9 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
   object$intercept <- intercept
   object$link.mean <- link.mean
   object$link.precision <- link.precision
+  object$terms <- list(mean = MTerms_x, precision = MTerms_v)
+  object$levels <- list(mean = stats::.getXlevels(MTerms_x, MF), precision = stats::.getXlevels(MTerms_v, MF))
+  object$contrasts <- list(mean = attr(x, "contrasts"), precision = attr(v, "contrasts"))
   object$kappa <- kap
   object$lambda <- lam
   object$mu <- mu

@@ -18,7 +18,7 @@ gradlam_bes_dbb(lam, wz, z, v, mu, link.precision)
 \item{mu}{mean parameter (vector having the same size of z).}
 
 \item{link.precision}{a string containing the link function the precision parameter.
-The possible link functions for the precision parameter are "identity", "log", "sqrt", "inverse".}
+The possible link functions for the precision parameter are "identity", "log", "sqrt".}
 }
 \value{
 Scalar representing the output of this auxiliary gradient function for the bessel case.
