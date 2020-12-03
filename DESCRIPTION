@@ -22,9 +22,11 @@ Authors@R:
 Maintainer: Vinicius Mayrink <vdinizm@gmail.com>
 Description: Functions to fit, via Expectation-Maximization (EM) algorithm, the Bessel and Beta regressions to a data set with a bounded continuous response variable. The Bessel regression is a new and robust approach proposed in the literature. The EM version for the well known Beta regression is another major contribution of this package. See the reference Barreto-Souza, Mayrink and Simas (2020) <arXiv:2003.05157> for details.  
 Depends: R (>= 3.5.0)
-License: GPL-2
+License: GPL-2 | file LICENSE
 Encoding: UTF-8
 LazyData: true
+URL: https://github.com/vpnsctl/bbreg/
+BugReports: https://github.com/vpnsctl/bbreg/issues
 Imports: pbapply, Formula, expint, statmod
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
