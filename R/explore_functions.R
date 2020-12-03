@@ -266,9 +266,9 @@ print.bbreg <- function(x, ...) {
   nlam <- length(x$lambda) 
   #
   coeff_kappa <- x$kappa
-  names(coeff_kappa) <- colnames(fit$x)
+  names(coeff_kappa) <- colnames(x$x)
   coeff_lambda <- x$lambda
-  names(coeff_lambda) <- colnames(fit$v)
+  names(coeff_lambda) <- colnames(x$v)
   cat("\n")
   cat(x$message)
   cat("\n\n")
@@ -431,7 +431,7 @@ summary.bbreg <- function(object, ...) {
   SEr <- M$std_errors
   tab <- cbind(Est, SEr, Est / SEr, 2 * stats::pnorm(-abs(Est / SEr)))
   colnames(tab) <- c("Estimate", "Std.error", "z-value", "Pr(>|z|)")
-  rownames(tab) <- c(colnames(fit$x), colnames(fit$v))
+  rownames(tab) <- c(colnames(M$x), colnames(M$v))
   tab <- list(mean = tab[seq.int(length.out = nkap), , drop = FALSE], precision = tab[seq.int(length.out = nlam) + nkap, , drop = FALSE])
   #
   digits <- max(3, getOption("digits") - 3)
