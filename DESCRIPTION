@@ -33,5 +33,6 @@ RoxygenNote: 7.1.1
 NeedsCompilation: no
 Suggests: 
     rmarkdown,
-    knitr
+    knitr,
+    devtools
 VignetteBuilder: knitr
