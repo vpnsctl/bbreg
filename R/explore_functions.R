@@ -263,27 +263,12 @@ predict.bbreg <- function(object, newdata = NULL, type = c("response", "link", "
 #' @export
 print.bbreg <- function(x, ...) {
   nkap <- length(x$kappa)
-  nlam <- length(x$lambda)
-  #
-  itc <- x$intercept
-  varnames <- NULL
-  if (itc[1] == TRUE) {
-    varnames <- "(intercept)"
-  }
-  varnames <- c(varnames, labels(stats::terms(stats::formula(x$call, rhs = 1))))
-  if (itc[2] == TRUE) {
-    varnames <- c(varnames, "(intercept)")
-  }
-  varnames <- c(varnames, labels(stats::terms(stats::formula(x$call, rhs = 2))))
-  #
-  if (length(varnames) < (nkap + nlam)) {
-    varnames <- names(x$start)
-  }
+  nlam <- length(x$lambda) 
   #
   coeff_kappa <- x$kappa
-  names(coeff_kappa) <- varnames[1:nkap]
+  names(coeff_kappa) <- colnames(fit$x)
   coeff_lambda <- x$lambda
-  names(coeff_lambda) <- varnames[(nkap + 1):(nkap + nlam)]
+  names(coeff_lambda) <- colnames(fit$v)
   cat("\n")
   cat(x$message)
   cat("\n\n")
@@ -442,26 +427,11 @@ summary.bbreg <- function(object, ...) {
   nkap <- length(M$kappa)
   nlam <- length(M$lambda)
   #
-  itc <- M$intercept
-  varnames <- NULL
-  if (itc[1] == TRUE) {
-    varnames <- "(intercept)"
-  }
-  varnames <- c(varnames, labels(stats::terms(stats::formula(M$call, rhs = 1))))
-  if (itc[2] == TRUE) {
-    varnames <- c(varnames, "(intercept)")
-  }
-  varnames <- c(varnames, labels(stats::terms(stats::formula(M$call, rhs = 2))))
-  #
-  if (length(varnames) < (nkap + nlam)) {
-    varnames <- names(M$start)
-  }
-  #
   Est <- c(M$kappa, M$lambda)
   SEr <- M$std_errors
   tab <- cbind(Est, SEr, Est / SEr, 2 * stats::pnorm(-abs(Est / SEr)))
   colnames(tab) <- c("Estimate", "Std.error", "z-value", "Pr(>|z|)")
-  rownames(tab) <- varnames
+  rownames(tab) <- c(colnames(fit$x), colnames(fit$v))
   tab <- list(mean = tab[seq.int(length.out = nkap), , drop = FALSE], precision = tab[seq.int(length.out = nlam) + nkap, , drop = FALSE])
   #
   digits <- max(3, getOption("digits") - 3)
