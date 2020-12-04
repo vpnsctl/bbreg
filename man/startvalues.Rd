@@ -4,7 +4,7 @@
 \alias{startvalues}
 \title{startvalues}
 \usage{
-startvalues(z, x, v, link.mean)
+startvalues(z, x, v, link.mean, link.precision, model)
 }
 \arguments{
 \item{z}{response vector with 0 < z_i < 1.}
@@ -15,6 +15,11 @@ startvalues(z, x, v, link.mean)
 
 \item{link.mean}{a string containing the link function for the mean.
 The possible link functions for the mean are "logit","probit", "cauchit", "cloglog".}
+
+\item{link.precision}{a string containing the link function the precision parameter.
+The possible link functions for the precision parameter are "identity", "log", "sqrt".}
+
+\item{model}{The model to which the initial values will be applied, "bessel" or "beta".}
 }
 \description{
 Function providing initial values for the Expectation-Maximization algorithm.

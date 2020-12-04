@@ -628,7 +628,7 @@ g_inv <- function(sigma2, model){
     } else {
       return(650)
     }
-    phi = uniroot((function (x,model) g_phi(x,model) - sigma2), lower = lower, upper = upper, model = model)$root
+    phi = stats::uniroot((function (x,model) g_phi(x,model) - sigma2), lower = lower, upper = upper, model = model)$root
     return(phi)
   } 
 }
