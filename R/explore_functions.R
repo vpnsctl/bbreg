@@ -489,13 +489,31 @@ summary.bbreg <- function(object, ...) {
 #' @param v matrix containing the covariates for the precision submodel. Each column is a different covariate.
 #' @param link.mean a string containing the link function for the mean.
 #' The possible link functions for the mean are "logit","probit", "cauchit", "cloglog".
-startvalues <- function(z, x, v, link.mean) {
+#' @param link.precision a string containing the link function the precision parameter.
+#' The possible link functions for the precision parameter are "identity", "log", "sqrt".
+#' @param model The model to which the initial values will be applied, "bessel" or "beta".
+startvalues <- function(z, x, v, link.mean, link.precision, model) {
   nkap <- ncol(x)
   nlam <- ncol(v)
+  n = length(z)
+  link_mean <- stats::make.link(link.mean)
+  link_precision <- stats::make.link(link.precision)
 
   fit_aux <- stats::glm.fit(x = x, y = z, family = stats::quasibinomial(link = link.mean))
   kap_start <- fit_aux$coefficients
-  lam_start <- rep(1, nlam)
+  
+  mu_est <- link_mean$linkinv(x %*% kap_start) 
+  
+  g_phi = sum((z-mu_est)^2/(mu_est*(1-mu_est)))/(n-nkap)
+  
+  phi_est = g_inv(g_phi, model)
+  
+  lam_start <- c(link_precision$linkfun(phi_est), rep(0, nlam-1))
+  
+  if(link_precision$linkinv(lam_start[1]) <= 0){
+    lam_start[1] = 1
+  }
+  
   out <- list()
 
   out[[1]] <- kap_start
@@ -555,3 +573,63 @@ d2phideta2 <- function(link.precision, phi) {
   )
   return(d2phi)
 }
+
+#############################################################################################
+#' @title g_phi
+#' @description Function to obtain the function g() that relates the precision parameter to the dispersion parameter for bessel and beta distributions.
+#' @param phi precision parameter.
+#' @param model "bessel" or "beta"
+
+g_phi <- function(phi, model){
+  if(model == "beta"){
+    return(1/(1+phi))
+  } else if(model == "bessel"){
+    return((1 - phi + (phi^2) * exp(phi) * expint_En(phi, order = 1)) / 2)
+  }
+}
+
+#############################################################################################
+#' @title g_inv
+#' @description Function to obtain the inverse of the function g() that relates the precision parameter to the dispersion parameter for bessel and beta distributions.
+#' @param sigma2 dispersion parameter.
+#' @param model "bessel" or "beta"
+
+g_inv <- function(sigma2, model){
+  if(model == "beta"){
+    return(1/sigma2 - 1)
+  } else if(model == "bessel"){
+    if(sigma2 >= 0.3){
+      lower = 0.001
+      upper = 1
+    } else if(sigma2 >= 0.15){
+      lower = 1
+      upper = 4
+    } else if(sigma2 >= 0.07){
+      lower = 4
+      upper = 12
+    } else if(sigma2 >= 0.044){
+      lower = 12
+      upper = 20
+    } else if(sigma2 >= 0.023){
+      lower = 20
+      upper = 40
+    } else if(sigma2 >= 0.01){
+      lower = 40
+      upper = 100
+    } else if(sigma2 >= 0.005){
+      lower = 100
+      upper = 200
+    } else if(sigma2 >= 0.0025){
+      lower = 200
+      upper = 400
+    } else if(sigma2 >= 0.0015) {
+      lower = 400
+      upper = 650
+    } else {
+      return(650)
+    }
+    phi = uniroot((function (x,model) g_phi(x,model) - sigma2), lower = lower, upper = upper, model = model)$root
+    return(phi)
+  } 
+}
+

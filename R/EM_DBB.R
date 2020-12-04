@@ -82,14 +82,17 @@ dbbtest <- function(formula, data, epsilon = 10^(-5), link.mean, link.precision)
   sumquasi <- sum(muquasi * (1 - muquasi) / 2 + muquasi^2)
   selection <- 0 # symbol: 0 = beta and 1 = bessel
   if (sumz2 < sumquasi) {
-    # Set initial values.
-    lam <- startvalues(z, x, v, link.mean)
+    # Set initial values for bessel.
+    lam <- startvalues(z, x, v, link.mean, link.precision, "bessel")
     lam <- lam[[2]]
     #
     EM <- EMrun_bes_dbb(lam, z, v, mu = muquasi, epsilon, link.precision)
     phi <- link_precision$linkinv(v %*% EM)
     gphi <- (1 - phi + (phi^2) * exp(phi) * expint_En(phi, order = 1)) / 2
     Wbes <- gphi
+    # Set initial values for beta
+    lam <- startvalues(z, x, v, link.mean, link.precision, "beta")
+    lam <- lam[[2]]
     #
     EM <- EMrun_bet_dbb(lam, z, v, mu = muquasi, epsilon, link.precision)
     phi <- link_precision$linkinv(v %*% EM)

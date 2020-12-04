@@ -265,16 +265,17 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
   }
 
   ## Set initial values.
-  start <- startvalues(z, x, v, link.mean)
-  kap <- start[[1]]
-  lam <- start[[2]]
-  start <- c(kap, lam)
-  names(start) <- c(paste0("kappa[", 1:nkap, "]"), paste0("lambda[", 1:nlam, "]"))
 
   ## EM algorithm
   if (is.character(model) == TRUE) {
     aux <- match.arg(model, c("bessel", "beta"))
     if (aux == "bessel") {
+      start <- startvalues(z, x, v, link.mean, link.precision, "bessel")
+      kap <- start[[1]]
+      lam <- start[[2]]
+      start <- c(kap, lam)
+      names(start) <- c(paste0("kappa[", 1:nkap, "]"), paste0("lambda[", 1:nlam, "]"))
+      
       modelname <- "Bessel regression"
       message <- paste0(modelname, " via EM - Ignoring the Discrimination test (DBB)")
       inits <- list(kap, lam)
@@ -311,6 +312,12 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
       rm("EM", "Est")
     }
     if (aux == "beta") {
+      start <- startvalues(z, x, v, link.mean, link.precision, "beta")
+      kap <- start[[1]]
+      lam <- start[[2]]
+      start <- c(kap, lam)
+      names(start) <- c(paste0("kappa[", 1:nkap, "]"), paste0("lambda[", 1:nlam, "]"))
+      
       modelname <- "Beta regression"
       message <- paste0(modelname, " via EM - Ignoring the Discrimination test (DBB)")
       EM <- EMrun_bet(kap, lam, z, x, v, epsilon, link.mean, link.precision)
@@ -350,6 +357,12 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
     aux <- dbbtest(formula, data, epsilon, link.mean, link.precision)
     # fit the chosen model
     if (aux[[2]] == "bessel") {
+      start <- startvalues(z, x, v, link.mean, link.precision, "bessel")
+      kap <- start[[1]]
+      lam <- start[[2]]
+      start <- c(kap, lam)
+      names(start) <- c(paste0("kappa[", 1:nkap, "]"), paste0("lambda[", 1:nlam, "]"))
+      
       modelname <- "Bessel regression"
       message <- paste0(modelname, " via EM - Model selected via Discrimination test (DBB)")
       EM <- EMrun_bes(kap, lam, z, x, v, epsilon, link.mean, link.precision)
@@ -384,6 +397,12 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
       rm("EM", "Est")
     }
     if (aux[[2]] == "beta") {
+      start <- startvalues(z, x, v, link.mean, link.precision, "beta")
+      kap <- start[[1]]
+      lam <- start[[2]]
+      start <- c(kap, lam)
+      names(start) <- c(paste0("kappa[", 1:nkap, "]"), paste0("lambda[", 1:nlam, "]"))
+      
       modelname <- "Beta regression"
       message <- paste0(modelname, " via EM - Model selected via Discrimination test (DBB)")
       EM <- EMrun_bet(kap, lam, z, x, v, epsilon, link.mean, link.precision)
