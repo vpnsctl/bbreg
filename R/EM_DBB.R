@@ -229,10 +229,14 @@ EMrun_bes_dbb <- function(lam, z, v, mu, epsilon, link.precision) {
     ### E step ------------------------------
     wz_r <- Ew1z(z, mu, phi_r)
     ### M step ------------------------------
-    M <- stats::optim(
+    M <- tryCatch(stats::optim(
       par = lam, fn = Qf_bes_dbb, gr = gradlam_bes_dbb, wz = wz_r, z = z, v = v,
       mu = mu, link.precision = link.precision, control = list(fnscale = -1), method = "L-BFGS-B"
-    )
+    ), error = function(e){"Error"})
+    if(length(M) == 1){
+      warning("The EM algorithm did not converge.")
+      break
+    }
     lam <- M$par
     phi <- link_precision$linkinv(v %*% lam)
     # Compute Q -----------------------------
@@ -274,10 +278,14 @@ EMrun_bet_dbb <- function(lam, z, v, mu, epsilon, link.precision) {
     phi_r <- phi
     ### E step ------------------------------
     ### M step ------------------------------
-    M <- stats::optim(
+    M <- tryCatch(stats::optim(
       par = lam, fn = Qf_bet_dbb, gr = gradlam_bet_dbb, phiold = phi_r, z = z, v = v, mu = mu,
       link.precision = link.precision, control = list(fnscale = -1), method = "L-BFGS-B"
-    )
+    ), error = function(e){"Error"})
+    if(length(M) == 1){
+      warning("The EM algorithm did not converge.")
+      break
+    }
     lam <- M$par
     phi <- link_precision$linkinv(v %*% lam)
     # Compute Q -----------------------------
