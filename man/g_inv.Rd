@@ -12,5 +12,5 @@ g_inv(sigma2, model)
 \item{model}{"bessel" or "beta"}
 }
 \description{
-Function to obtain the inverse of the function g() that relates the precision parameter to the dispersion parameter for bessel and beta distributions.
+Function to obtain an approximation of the inverse of the function g() that relates the precision parameter to the dispersion parameter for bessel and beta distributions.
 }
