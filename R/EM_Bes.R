@@ -277,7 +277,7 @@ EMrun_bes <- function(kap, lam, z, x, v, epsilon, link.mean, link.precision) {
     ### E step ------------------------------
     wz_r <- Ew1z(z, mu, phi)
     ### M step ------------------------------
-    M <- stats::optim(
+    M <- tryCatch(stats::optim(
       par = theta,
       fn = Qf_bes,
       gr = gradtheta_bes,
@@ -289,7 +289,11 @@ EMrun_bes <- function(kap, lam, z, x, v, epsilon, link.mean, link.precision) {
       link.precision = link.precision,
       control = list(fnscale = -1),
       method = "L-BFGS-B"
-    )
+    ), error = function(e){"Error"})
+    if(length(M) == 1){
+      warning("The EM algorithm did not converge.")
+      break
+    }
     theta <- M$par
     # Compute Q -----------------------------
     Q_r <- Qf_bes(theta_r, wz_r, z, x, v, link.mean, link.precision)

@@ -237,7 +237,7 @@ EMrun_bet <- function(kap, lam, z, x, v, epsilon, link.mean, link.precision) {
     phi_r <- phi
     ### E step ------------------------------
     ### M step ------------------------------
-    M <- stats::optim(
+    M <- tryCatch(stats::optim(
       par = theta,
       fn = Qf_bet,
       gr = gradtheta_bet,
@@ -249,7 +249,11 @@ EMrun_bet <- function(kap, lam, z, x, v, epsilon, link.mean, link.precision) {
       link.precision = link.precision,
       control = list(fnscale = -1),
       method = "L-BFGS-B"
-    )
+    ), error = function(e){"Error"})
+    if(length(M) == 1){
+      warning("The EM algorithm did not converge.")
+      break
+    }
     theta <- M$par
     # Compute Q -----------------------------
     Q_r <- Qf_bet(theta_r, phi_r, z, x, v, link.mean, link.precision)

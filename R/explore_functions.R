@@ -510,10 +510,6 @@ startvalues <- function(z, x, v, link.mean, link.precision, model) {
   
   lam_start <- c(link_precision$linkfun(phi_est), rep(0, nlam-1))
   
-  if(link_precision$linkinv(lam_start[1]) <= 0){
-    lam_start[1] = 1
-  }
-  
   out <- list()
 
   out[[1]] <- kap_start
