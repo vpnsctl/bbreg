@@ -249,8 +249,10 @@ EMrun_bet <- function(kap, lam, z, x, v, epsilon, link.mean, link.precision) {
       link.precision = link.precision,
       control = list(fnscale = -1),
       method = "L-BFGS-B"
-    ), error = function(e){"Error"})
-    if(length(M) == 1){
+    ), error = function(e) {
+      "Error"
+    })
+    if (length(M) == 1) {
       warning("The EM algorithm did not converge.")
       break
     }
@@ -461,7 +463,7 @@ pred_accuracy_bet <- function(residual, kap, lam, z, x, v, ntest, predict, epsil
     zte <- z[id_pred]
     xte <- as.matrix(x[id_pred, ])
     vte <- as.matrix(v[id_pred, ])
-    EMtr <- EMrun_bet(kap, lam, ztr, xtr, vtr, epsilon)
+    EMtr <- EMrun_bet(kap, lam, ztr, xtr, vtr, epsilon, link.mean, link.precision)
     kaptr <- EMtr[[1]][1:nkap]
     lamtr <- EMtr[[1]][-(1:nkap)]
     mupred <- link_mean$linkinv(xte %*% kaptr)

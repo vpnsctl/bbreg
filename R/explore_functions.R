@@ -48,7 +48,7 @@ plot.bbreg <- function(x, which = c(1, 2, 3, 4), ask = TRUE, main = "", qqline =
   residualname <- paste0(toupper(substring(x$residualname, 1, 1)), substring(x$residualname, 2))
   residualname <- paste0(residualname, " residuals")
   mu_est <- stats::fitted(x, type = "response")
-  
+
   if (1 %in% which) {
     # First plot (residuals vs index)
     ylab <- residualname
@@ -58,7 +58,7 @@ plot.bbreg <- function(x, which = c(1, 2, 3, 4), ask = TRUE, main = "", qqline =
     graphics::abline(0, 0, lty = 3)
     graphics::mtext(title_1, side = 3)
   }
-  
+
   # Second plot (QQ-plot)
   if (2 %in% which) {
     env <- x$envelope
@@ -88,12 +88,12 @@ plot.bbreg <- function(x, which = c(1, 2, 3, 4), ask = TRUE, main = "", qqline =
     graphics::points(RR$x, RR$y, ...)
     graphics::mtext(title_2, side = 3)
   }
-  
+
   # Third plot (fitted vs response)
-  
+
   if (3 %in% which) {
     obs <- x$z
-    
+
     title_3 <- paste0("Response vs Fitted means - ", name)
     ylab <- "Response"
     xlab <- paste0("Predicted values\n bbreg(", call_mod, ")")
@@ -101,10 +101,10 @@ plot.bbreg <- function(x, which = c(1, 2, 3, 4), ask = TRUE, main = "", qqline =
     graphics::abline(0, 1, lty = 3)
     graphics::mtext(title_3, side = 3)
   }
-  
-  
+
+
   # Fourth plot
-  
+
   if (4 %in% which) {
     title_4 <- paste0(residualname, " vs Fitted means - ", name)
     ylab <- paste0(residualname, " residuals")
@@ -140,30 +140,30 @@ fitted.bbreg <- function(object, type = c("response", "link", "precision", "vari
   if (!(type %in% c("response", "link", "precision", "variance"))) {
     stop(paste0("type must be one of ", possible_types))
   }
-  
+
   link_precision <- stats::make.link(fit$link.precision)
-  
+
   fitted_values <- switch(type,
-                          "response" = {
-                            mu <- fit$mu
-                            names(mu) <- 1:length(mu)
-                            mu
-                          },
-                          "link" = {
-                            link_fitted <- c(fit$x %*% fit$kappa)
-                            names(link_fitted) <- 1:length(link_fitted)
-                            link_fitted
-                          },
-                          "precision" = {
-                            fitted_prec <- c(link_precision$linkinv(fit$v %*% fit$lambda))
-                            names(fitted_prec) <- 1:length(fitted_prec)
-                            fitted_prec
-                          },
-                          "variance" = {
-                            variance_fitted <- c(fit$mu * (1 - fit$mu) * fit$gphi)
-                            names(variance_fitted) <- 1:length(variance_fitted)
-                            variance_fitted
-                          }
+    "response" = {
+      mu <- fit$mu
+      names(mu) <- 1:length(mu)
+      mu
+    },
+    "link" = {
+      link_fitted <- c(fit$x %*% fit$kappa)
+      names(link_fitted) <- 1:length(link_fitted)
+      link_fitted
+    },
+    "precision" = {
+      fitted_prec <- c(link_precision$linkinv(fit$v %*% fit$lambda))
+      names(fitted_prec) <- 1:length(fitted_prec)
+      fitted_prec
+    },
+    "variance" = {
+      variance_fitted <- c(fit$mu * (1 - fit$mu) * fit$gphi)
+      names(variance_fitted) <- 1:length(variance_fitted)
+      variance_fitted
+    }
   )
   return(fitted_values)
 }
@@ -192,56 +192,56 @@ predict.bbreg <- function(object, newdata = NULL, type = c("response", "link", "
   if (length(type) > 1) {
     type <- type[1]
   }
-  
+
   possible_types <- c("response", "link", "precision", "variance")
   if (!(type %in% c("response", "link", "precision", "variance"))) {
     stop(paste0("type must be one of ", possible_types))
   }
-  
-  
+
+
   if (missing(newdata)) {
     predictions <- stats::fitted(fit, type)
   } else {
     formula_temp <- Formula(fit$call)
     matrix_temp_x <- stats::model.matrix(object = formula_temp, data = newdata, rhs = 1)
     matrix_temp_v <- stats::model.matrix(object = formula_temp, data = newdata, rhs = 2)
-    
+
     kappa_est <- fit$kappa
     lambda_est <- fit$lambda
-    
+
     link_mean <- stats::make.link(fit$link.mean)
     link_precision <- stats::make.link(fit$link.precision)
-    
+
     mu_est <- link_mean$linkinv(matrix_temp_x %*% kappa_est)
     mu_est <- c(mu_est)
     names(mu_est) <- 1:length(mu_est)
-    
+
     phi_est <- c(link_precision$linkinv(matrix_temp_v %*% fit$lambda))
     names(phi_est) <- 1:length(phi_est)
-    
+
     if (fit$modelname == "Bessel regression") {
       gphi_est <- c((1 - phi_est + (phi_est^2) * exp(phi_est) * expint_En(phi_est, order = 1)) / 2)
     } else {
       gphi_est <- c(1 / (1 + phi_est))
     }
-    
+
     predictions <- switch(type,
-                          "response" = {
-                            mu_est
-                          },
-                          "link" = {
-                            link_predict <- c(matrix_temp_x %*% kappa_est)
-                            names(link_predict) <- 1:length(link_predict)
-                            link_predict
-                          },
-                          "precision" = {
-                            phi_est
-                          },
-                          "variance" = {
-                            variance_fitted <- c(mu_est * (1 - mu_est) * gphi_est)
-                            names(variance_fitted) <- 1:length(variance_fitted)
-                            variance_fitted
-                          }
+      "response" = {
+        mu_est
+      },
+      "link" = {
+        link_predict <- c(matrix_temp_x %*% kappa_est)
+        names(link_predict) <- 1:length(link_predict)
+        link_predict
+      },
+      "precision" = {
+        phi_est
+      },
+      "variance" = {
+        variance_fitted <- c(mu_est * (1 - mu_est) * gphi_est)
+        names(variance_fitted) <- 1:length(variance_fitted)
+        variance_fitted
+      }
     )
   }
   return(predictions)
@@ -263,7 +263,7 @@ predict.bbreg <- function(object, newdata = NULL, type = c("response", "link", "
 #' @export
 print.bbreg <- function(x, ...) {
   nkap <- length(x$kappa)
-  nlam <- length(x$lambda) 
+  nlam <- length(x$lambda)
   #
   coeff_kappa <- x$kappa
   names(coeff_kappa) <- colnames(x$x)
@@ -327,13 +327,13 @@ coef.bbreg <- function(object, parameters = c("all", "mean", "precision"), ...) 
     parameters <- parameters[1]
   }
   coef_ext <- switch(parameters,
-                     "all" = {
-                       all_coeff
-                     }, "mean" = {
-                       coeff_kappa
-                     }, "precision" = {
-                       coeff_lambda
-                     }
+    "all" = {
+      all_coeff
+    }, "mean" = {
+      coeff_kappa
+    }, "precision" = {
+      coeff_lambda
+    }
   )
   return(coef_ext)
 }
@@ -383,26 +383,26 @@ vcov.bbreg <- function(object, parameters = c("all", "mean", "precision"), ...) 
   }
   model_bb <- fit$modelname
   vcov_bb_complete <- switch(model_bb,
-                             "Bessel regression" = {
-                               infmat_bes(all_coeff, fit$z, fit$x, fit$v, fit$link.mean, fit$link.precision, information = TRUE)
-                             },
-                             "Beta regression" = {
-                               infmat_bet(all_coeff, fit$z, fit$x, fit$v, fit$link.mean, fit$link.precision, information = TRUE)
-                             }
+    "Bessel regression" = {
+      infmat_bes(all_coeff, fit$z, fit$x, fit$v, fit$link.mean, fit$link.precision, information = TRUE)
+    },
+    "Beta regression" = {
+      infmat_bet(all_coeff, fit$z, fit$x, fit$v, fit$link.mean, fit$link.precision, information = TRUE)
+    }
   )
   vcov_bb_complete <- tryCatch(solve(vcov_bb_complete), error = function(e) rep(NA, nrow(vcov_bb_complete)))
   vcov_bb <- switch(parameters,
-                    "all" = {
-                      vcov_bb_complete
-                    },
-                    "mean" = {
-                      vcov_bb_complete[1:nkap, 1:nkap]
-                    },
-                    "precision" = {
-                      vcov_bb_complete[(nkap + 1):nlam, (nkap + 1):nlam]
-                    }
+    "all" = {
+      vcov_bb_complete
+    },
+    "mean" = {
+      vcov_bb_complete[1:nkap, 1:nkap]
+    },
+    "precision" = {
+      vcov_bb_complete[(nkap + 1):nlam, (nkap + 1):nlam]
+    }
   )
-  
+
   return(vcov_bb)
 }
 
@@ -495,23 +495,23 @@ summary.bbreg <- function(object, ...) {
 startvalues <- function(z, x, v, link.mean, link.precision, model) {
   nkap <- ncol(x)
   nlam <- ncol(v)
-  n = length(z)
+  n <- length(z)
   link_mean <- stats::make.link(link.mean)
   link_precision <- stats::make.link(link.precision)
-  
+
   fit_aux <- stats::glm.fit(x = x, y = z, family = stats::quasibinomial(link = link.mean))
   kap_start <- fit_aux$coefficients
-  
-  mu_est <- link_mean$linkinv(x %*% kap_start) 
-  
-  g_phi = sum((z-mu_est)^2/(mu_est*(1-mu_est)))/(n-nkap)
-  
-  phi_est = g_inv(g_phi, model)
-  
-  lam_start <- c(link_precision$linkfun(phi_est), rep(0, nlam-1))
-  
+
+  mu_est <- link_mean$linkinv(x %*% kap_start)
+
+  g_phi <- sum((z - mu_est)^2 / (mu_est * (1 - mu_est))) / (n - nkap)
+
+  phi_est <- g_inv(g_phi, model)
+
+  lam_start <- c(link_precision$linkfun(phi_est), rep(0, nlam - 1))
+
   out <- list()
-  
+
   out[[1]] <- kap_start
   out[[2]] <- lam_start
   return(out)
@@ -526,18 +526,18 @@ startvalues <- function(z, x, v, link.mean, link.precision, model) {
 
 d2mudeta2 <- function(link.mean, mu) {
   d2mu <- switch(link.mean,
-                 "logit" = {
-                   mu * (1 - mu) * (1 - 2 * mu)
-                 },
-                 "probit" = {
-                   (-mu / sqrt(2 * pi)) * exp(-mu^2 / 2)
-                 },
-                 "cloglog" = {
-                   -(1 - mu) * log(1 - mu) * (1 + log(1 - mu))
-                 },
-                 "cauchit" = {
-                   (-2 / pi) * tan(pi * (mu - 1 / 2)) / ((1 + tan(pi * (mu - 1 / 2))^2)^2)
-                 }
+    "logit" = {
+      mu * (1 - mu) * (1 - 2 * mu)
+    },
+    "probit" = {
+      (-mu / sqrt(2 * pi)) * exp(-mu^2 / 2)
+    },
+    "cloglog" = {
+      -(1 - mu) * log(1 - mu) * (1 + log(1 - mu))
+    },
+    "cauchit" = {
+      (-2 / pi) * tan(pi * (mu - 1 / 2)) / ((1 + tan(pi * (mu - 1 / 2))^2)^2)
+    }
   )
   return(d2mu)
 }
@@ -551,21 +551,21 @@ d2mudeta2 <- function(link.mean, mu) {
 
 d2phideta2 <- function(link.precision, phi) {
   d2phi <- switch(link.precision,
-                  "identity" = {
-                    0
-                  },
-                  "log" = {
-                    phi
-                  },
-                  "sqrt" = {
-                    2
-                  },
-                  "inverse" = {
-                    2 * phi^3
-                  },
-                  "1/precision^2" = {
-                    3 * phi^5 / 4
-                  }
+    "identity" = {
+      0
+    },
+    "log" = {
+      phi
+    },
+    "sqrt" = {
+      2
+    },
+    "inverse" = {
+      2 * phi^3
+    },
+    "1/precision^2" = {
+      3 * phi^5 / 4
+    }
   )
   return(d2phi)
 }
@@ -576,10 +576,10 @@ d2phideta2 <- function(link.precision, phi) {
 #' @param phi precision parameter.
 #' @param model "bessel" or "beta"
 
-g_phi <- function(phi, model){
-  if(model == "beta"){
-    return(1/(1+phi))
-  } else if(model == "bessel"){
+g_phi <- function(phi, model) {
+  if (model == "beta") {
+    return(1 / (1 + phi))
+  } else if (model == "bessel") {
     return((1 - phi + (phi^2) * exp(phi) * expint_En(phi, order = 1)) / 2)
   }
 }
@@ -590,31 +590,30 @@ g_phi <- function(phi, model){
 #' @param sigma2 dispersion parameter.
 #' @param model "bessel" or "beta"
 
-g_inv <- function(sigma2, model){
-  if(model == "beta"){
-    return(1/sigma2 - 1)
-  } else if(model == "bessel"){
-    if(sigma2 >= 0.3){
+g_inv <- function(sigma2, model) {
+  if (model == "beta") {
+    return(1 / sigma2 - 1)
+  } else if (model == "bessel") {
+    if (sigma2 >= 0.3) {
       return(0.5)
-    } else if(sigma2 >= 0.15){
+    } else if (sigma2 >= 0.15) {
       return(2)
-    } else if(sigma2 >= 0.07){
+    } else if (sigma2 >= 0.07) {
       return(8)
-    } else if(sigma2 >= 0.044){
+    } else if (sigma2 >= 0.044) {
       return(15)
-    } else if(sigma2 >= 0.023){
+    } else if (sigma2 >= 0.023) {
       return(30)
-    } else if(sigma2 >= 0.01){
+    } else if (sigma2 >= 0.01) {
       return(80)
-    } else if(sigma2 >= 0.005){
+    } else if (sigma2 >= 0.005) {
       return(150)
-    } else if(sigma2 >= 0.0025){
+    } else if (sigma2 >= 0.0025) {
       return(300)
-    } else if(sigma2 >= 0.0015) {
+    } else if (sigma2 >= 0.0015) {
       return(525)
     } else {
       return(650)
-    } 
-  } 
+    }
+  }
 }
-

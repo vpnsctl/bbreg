@@ -289,8 +289,10 @@ EMrun_bes <- function(kap, lam, z, x, v, epsilon, link.mean, link.precision) {
       link.precision = link.precision,
       control = list(fnscale = -1),
       method = "L-BFGS-B"
-    ), error = function(e){"Error"})
-    if(length(M) == 1){
+    ), error = function(e) {
+      "Error"
+    })
+    if (length(M) == 1) {
       warning("The EM algorithm did not converge.")
       break
     }

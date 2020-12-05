@@ -232,8 +232,10 @@ EMrun_bes_dbb <- function(lam, z, v, mu, epsilon, link.precision) {
     M <- tryCatch(stats::optim(
       par = lam, fn = Qf_bes_dbb, gr = gradlam_bes_dbb, wz = wz_r, z = z, v = v,
       mu = mu, link.precision = link.precision, control = list(fnscale = -1), method = "L-BFGS-B"
-    ), error = function(e){"Error"})
-    if(length(M) == 1){
+    ), error = function(e) {
+      "Error"
+    })
+    if (length(M) == 1) {
       warning("The EM algorithm did not converge.")
       break
     }
@@ -281,8 +283,10 @@ EMrun_bet_dbb <- function(lam, z, v, mu, epsilon, link.precision) {
     M <- tryCatch(stats::optim(
       par = lam, fn = Qf_bet_dbb, gr = gradlam_bet_dbb, phiold = phi_r, z = z, v = v, mu = mu,
       link.precision = link.precision, control = list(fnscale = -1), method = "L-BFGS-B"
-    ), error = function(e){"Error"})
-    if(length(M) == 1){
+    ), error = function(e) {
+      "Error"
+    })
+    if (length(M) == 1) {
       warning("The EM algorithm did not converge.")
       break
     }

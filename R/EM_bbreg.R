@@ -126,7 +126,8 @@
 #' @export
 bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cloglog"),
                   link.precision = c("identity", "log", "sqrt"),
-                  model = NULL, residual = NULL, envelope = 0, prob = 0.95, predict = 0, ptest = 0.25, epsilon = 10^(-5)) {
+                  model = NULL, residual = NULL, envelope = 0, prob = 0.95, predict = 0, 
+                  ptest = 0.25, epsilon = 10^(-5)) {
   ## Processing call
   # If data is not provided, verify the current R workspace
   if (missing(data)) {
@@ -275,7 +276,7 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
       lam <- start[[2]]
       start <- c(kap, lam)
       names(start) <- c(paste0("kappa[", 1:nkap, "]"), paste0("lambda[", 1:nlam, "]"))
-      
+
       modelname <- "Bessel regression"
       message <- paste0(modelname, " via EM - Ignoring the Discrimination test (DBB)")
       inits <- list(kap, lam)
@@ -317,7 +318,7 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
       lam <- start[[2]]
       start <- c(kap, lam)
       names(start) <- c(paste0("kappa[", 1:nkap, "]"), paste0("lambda[", 1:nlam, "]"))
-      
+
       modelname <- "Beta regression"
       message <- paste0(modelname, " via EM - Ignoring the Discrimination test (DBB)")
       EM <- EMrun_bet(kap, lam, z, x, v, epsilon, link.mean, link.precision)
@@ -362,7 +363,7 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
       lam <- start[[2]]
       start <- c(kap, lam)
       names(start) <- c(paste0("kappa[", 1:nkap, "]"), paste0("lambda[", 1:nlam, "]"))
-      
+
       modelname <- "Bessel regression"
       message <- paste0(modelname, " via EM - Model selected via Discrimination test (DBB)")
       EM <- EMrun_bes(kap, lam, z, x, v, epsilon, link.mean, link.precision)
@@ -402,7 +403,7 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
       lam <- start[[2]]
       start <- c(kap, lam)
       names(start) <- c(paste0("kappa[", 1:nkap, "]"), paste0("lambda[", 1:nlam, "]"))
-      
+
       modelname <- "Beta regression"
       message <- paste0(modelname, " via EM - Model selected via Discrimination test (DBB)")
       EM <- EMrun_bet(kap, lam, z, x, v, epsilon, link.mean, link.precision)
