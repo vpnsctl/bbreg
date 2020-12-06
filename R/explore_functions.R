@@ -358,26 +358,11 @@ vcov.bbreg <- function(object, parameters = c("all", "mean", "precision"), ...) 
   nkap <- length(fit$kappa)
   nlam <- length(fit$lambda)
   #
-  itc <- fit$intercept
-  varnames <- NULL
-  if (itc[1] == TRUE) {
-    varnames <- "(intercept)"
-  }
-  varnames <- c(varnames, labels(stats::terms(stats::formula(fit$call, rhs = 1))))
-  if (itc[2] == TRUE) {
-    varnames <- c(varnames, "(intercept)")
-  }
-  varnames <- c(varnames, labels(stats::terms(stats::formula(fit$call, rhs = 2))))
-  #
-  if (length(varnames) < (nkap + nlam)) {
-    varnames <- names(fit$start)
-  }
-  #
-  coeff_kappa <- fit$kappa
-  names(coeff_kappa) <- varnames[1:nkap]
-  coeff_lambda <- fit$lambda
-  names(coeff_lambda) <- varnames[(nkap + 1):(nkap + nlam)]
+  coeff_kappa <- fit$coefficients$mean
+  coeff_lambda <- fit$coefficients$precision
   all_coeff <- c(coeff_kappa, coeff_lambda)
+  coeff_names = c(names(coeff_kappa),paste(names(coeff_lambda), ".precision", sep = ""))
+
   if (length(parameters) > 1) {
     parameters <- parameters[1]
   }
@@ -393,13 +378,14 @@ vcov.bbreg <- function(object, parameters = c("all", "mean", "precision"), ...) 
   vcov_bb_complete <- tryCatch(solve(vcov_bb_complete), error = function(e) rep(NA, nrow(vcov_bb_complete)))
   vcov_bb <- switch(parameters,
     "all" = {
+      colnames(vcov_bb_complete) <- rownames(vcov_bb_complete) <- coeff_names
       vcov_bb_complete
     },
     "mean" = {
       vcov_bb_complete[1:nkap, 1:nkap]
     },
     "precision" = {
-      vcov_bb_complete[(nkap + 1):nlam, (nkap + 1):nlam]
+      vcov_bb_complete[(nkap + 1):(nkap + nlam), (nkap + 1):(nkap + nlam)]
     }
   )
 

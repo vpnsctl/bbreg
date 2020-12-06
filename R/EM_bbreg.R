@@ -275,8 +275,9 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
       kap <- start[[1]]
       lam <- start[[2]]
       start <- c(kap, lam)
-      names(start) <- c(paste0("kappa[", 1:nkap, "]"), paste0("lambda[", 1:nlam, "]"))
-
+      #names(start) <- c(paste0("kappa[", 1:nkap, "]"), paste0("lambda[", 1:nlam, "]"))
+      names(start) = c(colnames(x), paste(colnames(v),".precision", sep = ""))
+      
       modelname <- "Bessel regression"
       message <- paste0(modelname, " via EM - Ignoring the Discrimination test (DBB)")
       inits <- list(kap, lam)
@@ -317,7 +318,8 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
       kap <- start[[1]]
       lam <- start[[2]]
       start <- c(kap, lam)
-      names(start) <- c(paste0("kappa[", 1:nkap, "]"), paste0("lambda[", 1:nlam, "]"))
+      names(start) = c(colnames(x), paste(colnames(v),".precision", sep = ""))
+      #names(start) <- c(paste0("kappa[", 1:nkap, "]"), paste0("lambda[", 1:nlam, "]"))
 
       modelname <- "Beta regression"
       message <- paste0(modelname, " via EM - Ignoring the Discrimination test (DBB)")
@@ -362,7 +364,8 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
       kap <- start[[1]]
       lam <- start[[2]]
       start <- c(kap, lam)
-      names(start) <- c(paste0("kappa[", 1:nkap, "]"), paste0("lambda[", 1:nlam, "]"))
+      names(start) = c(colnames(x), paste(colnames(v),".precision", sep = ""))
+      #names(start) <- c(paste0("kappa[", 1:nkap, "]"), paste0("lambda[", 1:nlam, "]"))
 
       modelname <- "Bessel regression"
       message <- paste0(modelname, " via EM - Model selected via Discrimination test (DBB)")
@@ -402,7 +405,8 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
       kap <- start[[1]]
       lam <- start[[2]]
       start <- c(kap, lam)
-      names(start) <- c(paste0("kappa[", 1:nkap, "]"), paste0("lambda[", 1:nlam, "]"))
+      names(start) = c(colnames(x), paste(colnames(v),".precision", sep = ""))
+      #names(start) <- c(paste0("kappa[", 1:nkap, "]"), paste0("lambda[", 1:nlam, "]"))
 
       modelname <- "Beta regression"
       message <- paste0(modelname, " via EM - Model selected via Discrimination test (DBB)")
@@ -438,6 +442,13 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
       rm("EM", "Est")
     }
   }
+  
+  #Naming variables accordingly
+  names(kap) <- colnames(x)
+  names(lam) <- colnames(v)
+  names(mu) <- 1:length(mu)
+  names(gphi) <- 1:length(gphi)
+  
   ###############
   object <- list()
   object$call <- Fo
@@ -455,6 +466,9 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
   object$kappa <- kap
   object$lambda <- lam
   object$mu <- mu
+  object$fitted.values <- mu
+  object$coefficients <- list(mean = kap, precision = lam)
+  object$start <- start
   object$x <- x
   object$v <- v
   object$z <- z
