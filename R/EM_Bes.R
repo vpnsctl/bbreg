@@ -552,7 +552,7 @@ score_residual_bes <- function(kap, lam, z, x, v, nsim_score = 100, link.mean, l
 #' @name bessel
 #' @title Bessel Distribution
 #' @aliases dbessel rbessel pbessel qbessel
-#' @description Function to calculate the cumulative distribution, probability density, 
+#' @description Functions to calculate the cumulative distribution, probability density, 
 #' generate bessel random numbers and find quantiles of the bessel distribution
 #' @param z vector of numbers in (0,1) for which the p.d.f. is to be evaluated.
 #' @param p vector of probabilities.
@@ -564,13 +564,10 @@ score_residual_bes <- function(kap, lam, z, x, v, nsim_score = 100, link.mean, l
 #' @seealso
 #' \code{\link{simdata_bes}}, \code{\link{dbbtest}}, \code{\link{simdata_bet}}
 #' @examples
-#' z <- seq(0.01, 0.99, 0.01)
-#' np <- length(z)
-#' density <- rep(0, np)
-#' for (i in 1:np) {
-#'   density[i] <- dbessel(z[i], 0.5, 1)
-#' }
-#' plot(z, density, type = "l", lwd = 2, cex.lab = 2, cex.axis = 2)
+#' rbessel(100, mu = 0.2, phi = 10)
+#' pbessel(0.4, mu = 0.1)
+#' qbessel(0.8, mu = 0.8)
+#' plot(dbessel)
 #' @rdname bessel
 #' @export
 dbessel <- function(z, mu = 1/2, phi = 1) {
