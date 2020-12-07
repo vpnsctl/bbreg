@@ -549,11 +549,17 @@ score_residual_bes <- function(kap, lam, z, x, v, nsim_score = 100, link.mean, l
 }
 
 #############################################################################################
-#' @title dbessel
-#' @description Function to calculate the probability density of the bessel distribution.
-#' @param z scalar (0 < z < 1) for which the p.d.f. is to be evaluated.
-#' @param mu scalar representing the mean parameter.
-#' @param phi scalar representing the precision parameter.
+#' @name bessel
+#' @title Bessel Distribution
+#' @aliases dbessel rbessel pbessel qbessel
+#' @description Function to calculate the cumulative distribution, probability density, 
+#' generate bessel random numbers and find quantiles of the bessel distribution
+#' @param z vector of numbers in (0,1) for which the p.d.f. is to be evaluated.
+#' @param p vector of probabilities.
+#' @param q vector of quantiles.
+#' @param mu vector of numbers in (0,1) representing the mean parameter.
+#' @param phi vector of positive numbers representing the precision parameter.
+#' @param n sample size.
 #' @return scalar expressing the value of the density at z.
 #' @seealso
 #' \code{\link{simdata_bes}}, \code{\link{dbbtest}}, \code{\link{simdata_bet}}
@@ -565,12 +571,64 @@ score_residual_bes <- function(kap, lam, z, x, v, nsim_score = 100, link.mean, l
 #'   density[i] <- dbessel(z[i], 0.5, 1)
 #' }
 #' plot(z, density, type = "l", lwd = 2, cex.lab = 2, cex.axis = 2)
+#' @rdname bessel
 #' @export
-dbessel <- function(z, mu, phi) {
-  zeta <- sqrt((z * (1 - 2 * mu) + mu^2) / (z - z^2))
-  out <- mu * (1 - mu) * phi * exp(phi) * besselK((phi * zeta), 1)
-  out <- out / (zeta * pi * (z * (1 - z))^(3 / 2))
-  return(out)
+dbessel <- function(z, mu = 1/2, phi = 1) {
+  dens_bessel <- sapply(z, function(x){
+    if(x <= 0 | x >=1){
+      return(0)
+    } else{
+      zeta <- sqrt((x * (1 - 2 * mu) + mu^2) / (x - x^2))
+      out <- mu * (1 - mu) * phi * exp(phi) * besselK((phi * zeta), 1)
+      out <- out / (zeta * pi * (x* (1 - x))^(3 / 2))
+      return(out)
+    }
+  })
+  return(dens_bessel)
+}
+
+#' @rdname bessel
+#' @export
+rbessel <- function(n, mu = 1/2, phi = 1){
+  a <- mu * phi
+  b <- phi * (1 - mu)
+  Y1 <- rinvgauss(n, mean = a, shape = a^2)
+  Y2 <- rinvgauss(n, mean = b, shape = b^2)
+  return(Y1 / (Y1 + Y2))
+}
+
+#' @rdname bessel
+#' @export
+pbessel <- function(q, mu = 1/2, phi = 1){
+  prob_bessel <- sapply(q, function(v){
+    if(v<=0){
+      return(0)
+    } else if(v>=1){
+      return(1)
+    } else{
+      stats::integrate(dbessel,lower = 0, upper = v, mu=mu, phi=phi)$value
+    }
+  })
+  return(prob_bessel)
+}
+
+#' @rdname bessel
+#' @export
+qbessel <- function(p, mu = 1/2, phi = 1){
+  quant_bessel <- sapply(p, function(x){
+    if(x < 0 | x > 1){
+      warn_qbessel <- TRUE
+      return(NaN)} else{
+      return(stats::uniroot(function(y) {
+        pbessel(y, mu=mu,phi=phi) - x
+      },lower = 0, upper = 1)$root)
+    }
+  }
+  )
+  if(any(is.nan(quant_bessel))){
+    warning("NaNs produced", call. = TRUE, domain = "R")
+  }
+  return(quant_bessel)
 }
 
 #############################################################################################
