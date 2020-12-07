@@ -33,17 +33,14 @@ qbessel(p, mu = 1/2, phi = 1)
 scalar expressing the value of the density at z.
 }
 \description{
-Function to calculate the cumulative distribution, probability density,
+Functions to calculate the cumulative distribution, probability density,
 generate bessel random numbers and find quantiles of the bessel distribution
 }
 \examples{
-z <- seq(0.01, 0.99, 0.01)
-np <- length(z)
-density <- rep(0, np)
-for (i in 1:np) {
-  density[i] <- dbessel(z[i], 0.5, 1)
-}
-plot(z, density, type = "l", lwd = 2, cex.lab = 2, cex.axis = 2)
+rbessel(100, mu = 0.2, phi = 10)
+pbessel(0.4, mu = 0.1)
+qbessel(0.8, mu = 0.8)
+plot(dbessel)
 }
 \seealso{
 \code{\link{simdata_bes}}, \code{\link{dbbtest}}, \code{\link{simdata_bet}}
