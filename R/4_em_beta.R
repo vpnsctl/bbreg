@@ -21,30 +21,30 @@ D2Q_Obs_Fisher_bet <- function(theta, z, x, v, link.mean, link.precision) {
   link_precision <- stats::make.link(link.precision)
   mu <- link_mean$linkinv(x %*% kap) # mean parameter.
   phi <- link_precision$linkinv(v %*% lam) # phi precision parameter.
-
+  
   dmudeta <- link_mean$mu.eta(x %*% kap)
   dphideta <- link_precision$mu.eta(v %*% lam)
   d2mu <- d2mudeta2(link.mean, mu)
   d2phi <- d2phideta2(link.precision, phi)
-
+  
   auxKK1 <- (trigamma(mu * phi) + trigamma((1 - mu) * phi)) * phi^2 * dmudeta^2
   auxKK2 <- phi * (log(z) - log(1 - z) - digamma(mu * phi) + digamma((1 - mu) * phi)) * d2mu
   KK <- diag(c(auxKK1 - auxKK2))
-
+  
   auxLL1 <- ((mu^2) * trigamma(mu * phi) + ((1 - mu)^2) * trigamma((1 - mu) * phi)) * dphideta^2
   auxLL2 <- (mu * (log(z) - log(1 - z)) + digamma(phi) + log(1 - z) - mu * digamma(mu * phi) - (1 - mu) * digamma((1 - mu) * phi)) * d2phi
   LL <- diag(c(auxLL1 + auxLL2))
-
+  
   auxKL <- (-log(z) + log(1 - z) + digamma(mu * phi) - digamma((1 - mu) * phi) + mu * phi * trigamma(mu * phi) - (1 - mu) * phi * trigamma((1 - mu) * phi)) * dmudeta * dphideta
   KL <- diag(c(auxKL))
-
+  
   D2QKappa <- (t(x) %*% KK) %*% x
   D2QKL <- (t(x) %*% KL) %*% v
   D2QKappa <- cbind(D2QKappa, D2QKL)
   D2QLambda <- (t(v) %*% LL) %*% v
   D2QLambda <- cbind(t(D2QKL), D2QLambda)
   D2Q <- rbind(D2QKappa, D2QLambda)
-
+  
   return(D2Q)
 }
 
@@ -71,20 +71,20 @@ DQ2_Obs_Fisher_bet <- function(theta, z, x, v, link.mean, link.precision) {
   link_precision <- stats::make.link(link.precision)
   mu <- link_mean$linkinv(x %*% kap) # mean parameter.
   phi <- link_precision$linkinv(v %*% lam) # phi precision parameter.
-
+  
   dmudeta <- link_mean$mu.eta(x %*% kap)
   dphideta <- link_precision$mu.eta(v %*% lam)
   d2mu <- d2mudeta2(link.mean, mu)
   d2phi <- d2phideta2(link.precision, phi)
-
+  
   grad1 <- c(((log(z) - log(1 - z) - digamma(mu * phi) + digamma((1 - mu) * phi)) * phi) * dmudeta)
   grad2 <- c((mu * (log(z) - log(1 - z)) + digamma(phi) + log(1 - z) - mu * digamma(mu * phi) - (1 - mu) * digamma((1 - mu) * phi)) * dphideta)
-
+  
   aux_LL <- digamma(phi) + log(1 - z) + mu * (log(z) - log(1 - z))
   aux_LL <- aux_LL - mu * digamma(mu * phi) - (1 - mu) * digamma((1 - mu) * phi)
   aux_LL <- (trigamma(phi) + aux_LL^2)
   aux_LL <- aux_LL * dphideta^2
-
+  
   KK_temp <- grad1 %*% t(grad1)
   DQ2Kappa <- (t(x) %*% KK_temp) %*% x
   KL_temp <- grad1 %*% t(grad2)
@@ -92,7 +92,7 @@ DQ2_Obs_Fisher_bet <- function(theta, z, x, v, link.mean, link.precision) {
   LL_temp <- grad2 %*% t(grad2)
   diag(LL_temp) <- c(aux_LL)
   DQ2Lambda <- (t(v) %*% LL_temp) %*% v
-
+  
   DQ21 <- cbind(DQ2Kappa, DQKL)
   DQ22 <- cbind(t(DQKL), DQ2Lambda)
   DQ2 <- rbind(DQ21, DQ22)
@@ -199,7 +199,7 @@ gradtheta_bet <- function(theta, phiold, z, x, v, link.mean, link.precision) {
   aux <- aux - (1 - mu) * digamma((1 - mu) * phi)
   aux <- aux * dphideta
   Ulam <- t(v) %*% aux
-
+  
   return(c(Ukap, Ulam))
 }
 
@@ -227,7 +227,7 @@ EMrun_bet <- function(kap, lam, z, x, v, epsilon, link.mean, link.precision) {
   phi <- link_precision$linkinv(v %*% lam) # phi precision parameter.
   theta <- c(kap, lam)
   count <- 0
-
+  
   repeat{
     theta_r <- theta
     kap <- theta[1:nkap]
@@ -273,17 +273,17 @@ EMrun_bet <- function(kap, lam, z, x, v, epsilon, link.mean, link.precision) {
     }
     ### -------------------------------------
   }
-
+  
   if (sum(phi <= 0) > 0) {
     warning("one or more estimates of precision parameters were negative. Please, 
          consider using another link function for the precision parameter.")
   }
-
+  
   if (sum(is.nan(phi)) > 0) {
     warning("one or more estimates of precision parameters were not a number. Please, 
          consider using another link function for the precision parameter.")
   }
-
+  
   gphi <- 1 / (1 + phi)
   out <- list()
   out[[1]] <- c(kap, lam)
@@ -352,7 +352,7 @@ simdata_bet <- function(kap, lam, x, v, repetitions = 1, link.mean, link.precisi
   s2 <- phi * (1 - mu)
   n <- length(s1)
   Z <- rep(0, n)
-
+  
   Z <- lapply(1:repetitions, function(x) {
     Y <- stats::rbeta(n, shape1 = s1, shape2 = s2)
     Y[Y < 0.00001] <- 0.00001
@@ -385,35 +385,35 @@ simdata_bet <- function(kap, lam, x, v, repetitions = 1, link.mean, link.precisi
 envelope_bet <- function(residual, kap, lam, x, v, nsim_env, prob, n, epsilon, link.mean, link.precision) {
   zsim <- simdata_bet(kap, lam, x, v, nsim_env, link.mean, link.precision)
   Res <- switch(residual,
-    pearson = {
-      Res <- pblapply(zsim, function(zs) {
-        est <- EMrun_bet(kap, lam, z = zs, x, v, epsilon, link.mean, link.precision)$mu_gphi
-        musim <- est[, 1]
-        gpsim <- est[, 2]
-        (zs - musim) / (sqrt(gpsim * musim * (1 - musim)))
-      })
-      Res
-    },
-    score = {
-      nkap <- length(kap)
-      Res <- pblapply(zsim, function(zs) {
-        est <- EMrun_bet(kap, lam, z = zs, x, v, epsilon, link.mean, link.precision)$coeff
-        kapsim <- est[1:nkap]
-        lamsim <- est[-(1:nkap)]
-        score_residual_bet(kapsim, lamsim, zs, x, v, link.mean, link.precision)
-      })
-      Res
-    },
-    quantile = {
-      nkap <- length(kap)
-      Res <- pblapply(zsim, function(zs) {
-        est <- EMrun_bet(kap, lam, z = zs, x, v, epsilon, link.mean, link.precision)$coeff
-        kapsim <- est[1:nkap]
-        lamsim <- est[-(1:nkap)]
-        quantile_residual_bet(kapsim, lamsim, zs, x, v, link.mean, link.precision)
-      })
-      Res
-    }
+                pearson = {
+                  Res <- pblapply(zsim, function(zs) {
+                    est <- EMrun_bet(kap, lam, z = zs, x, v, epsilon, link.mean, link.precision)$mu_gphi
+                    musim <- est[, 1]
+                    gpsim <- est[, 2]
+                    (zs - musim) / (sqrt(gpsim * musim * (1 - musim)))
+                  })
+                  Res
+                },
+                score = {
+                  nkap <- length(kap)
+                  Res <- pblapply(zsim, function(zs) {
+                    est <- EMrun_bet(kap, lam, z = zs, x, v, epsilon, link.mean, link.precision)$coeff
+                    kapsim <- est[1:nkap]
+                    lamsim <- est[-(1:nkap)]
+                    score_residual_bet(kapsim, lamsim, zs, x, v, link.mean, link.precision)
+                  })
+                  Res
+                },
+                quantile = {
+                  nkap <- length(kap)
+                  Res <- pblapply(zsim, function(zs) {
+                    est <- EMrun_bet(kap, lam, z = zs, x, v, epsilon, link.mean, link.precision)$coeff
+                    kapsim <- est[1:nkap]
+                    lamsim <- est[-(1:nkap)]
+                    quantile_residual_bet(kapsim, lamsim, zs, x, v, link.mean, link.precision)
+                  })
+                  Res
+                }
   )
   Res <- t(matrix(unlist(Res), n, nsim_env))
   Res <- t(apply(Res, 1, sort))

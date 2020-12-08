@@ -27,9 +27,41 @@
 #' @param link.mean optionally, a string containing the link function for the mean. If omitted, the 'logit' link function will be used.
 #' The possible link functions for the mean are "logit","probit", "cauchit", "cloglog".
 #' @param link.precision optionally, a string containing the link function the precision parameter. If omitted and the only precision
-#' covariate is the intercept, the identity link function will be used, if omitted and there is a precision covariate other than the
+#' covariate is the intercept, the 'identity' link function will be used, if omitted and there is a precision covariate other than the
 #' intercept, the 'log' link function will be used. The possible link functions for the precision parameter are "identity", "log", "sqrt".
-#' @return Object of class \pkg{bbreg} containing the outputs from the model fit (bessel or beta regression).
+#' @return \code{bbreg} returns an object of class "bbreg". The function \code{bbreg.fit} returns an object of class "bbreg_fit".
+#' The objects of classes \code{bbreg} and \code{bbreg_fit} return lists containing:
+#' 
+#'  \itemize{
+#'   \item \code{coefficients} - a list with elements "mean" and "precision" containing the estimated coefficients of the model;
+#'   \item \code{call} - the formula used by the model. If using \code{bbreg.fit}, this returns \code{NULL}.
+#'   \item \code{modelname} - the fitted model, bessel or beta;
+#'   \item \code{message} - message to be displayed, regarding the usage or not of the discrimination criterion;
+#'   \item \code{residualname} - the name of the chosen residual in the call;
+#'   \item \code{niter} - number of iterations of the EM algorithm;
+#'   \item \code{start} - the initial guesses of the parameters
+#'   \item \code{intercept} - vector indicating if the intercept is present in the mean and/or in the precision regressions;
+#'   \item \code{link.mean} - link function of the mean;
+#'   \item \code{link.precision} - link function of the precision parameter;
+#'   \item \code{kappa} - vector containing the estimates of the mean-related coefficients;
+#'   \item \code{lambda} - vector containing the estimates of the precision-related coefficients;
+#'   \item \code{mu} - estimated means;
+#'   \item \code{fitted.values} - the fitted values in the response scale;
+#'   \item \code{x} - the covariates related to the mean;
+#'   \item \code{v} - the covariates related to the precision parameter;
+#'   \item \code{z} - the response variables;
+#'   \item \code{gphi} - the estimated dispersion parameters;
+#'   \item \code{residuals} - the values of the chosen residual in the call;
+#'   \item \code{std_errors} - the standard errors of the estimated parameters;
+#'   \item \code{RSS} - sum of squared residuals;
+#'   \item \code{RSS_pred} - sum of squared residuals from the predictions (when prediction is performed);
+#'   \item \code{DBB} - vector containing the discrimination statistics (when discrimination is performed);
+#'   \item \code{envelope} - the numerical envelopes used to build the Q-Q plot with simulated envelopes;
+#'   \item \code{terms} - (only for \code{bbreg})the \code{terms} object used;
+#'   \item \code{levels} - (where relevant, only for \code{bbreg}) the levels of the factors used;
+#'   \item \code{contrasts} - (where relevant, only for \code{bbreg}) the contrasts used.
+#' }
+#'
 #'
 #' @details The bessel regression originates from a class of normalized inverse-Gaussian (N-IG) process introduced in \emph{Lijoi et al. (2005)}
 #' as an alternative to the widely used Dirichlet process in the Bayesian context. These authors consider a ratio of inverse-Gaussian random variables
@@ -41,7 +73,7 @@
 #' in its p.d.f. structure. The bessel regression model is defined by assuming "Z_1,...,Z_n" as a random sample of continuous bounded responses with
 #' "Z_i ~ Bessel(mu_i,phi_i)" for "i = 1,...,n". Using this parameterization, one can write: "E(Z_i) = mu_i" and "Var(Z_i) = mu_i(1-mu_i) g(phi_i)",
 #' where "\emph{g(-)}" is a function depending on the exponential integral of "phi_i". The following link functions are assumed "logit(mu_i) = x_i^T kappa" and
-#' "log(phi_i) = v_i^T lambda", where "kappa' = (kappa_1,...,kappa_p)" and "lambda' = (lambda_1,...,lambda[q])" are real valued vectors.
+#' "log(phi_i) = v_i^T lambda", where "kappa' = (kappa_1,...,kappa_p)" and "lambda' = (lambda_1,...,lambda_q)" are real valued vectors.
 #' The terms "x_i^T" and "v_i^T" represent, respectively, the i-th row of the matrices "x" (\emph{nxp}) and "v" (\emph{nxq}) containing covariates in their columns
 #' ("x_{i,1}" and "v_{i,1}" may be 1 to handle intercepts). As it can be seen, this regression model has two levels with covariates explaining the mean
 #' "mu_i" and the parameter "phi_i". For more details about the bessel regression see \emph{Barreto-Souza, Mayrink and Simas (2020)}.
@@ -144,7 +176,7 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
   arg_names <- match(c("formula", "data"), names(MF), nomatch = 0)
   MF <- MF[c(1, arg_names)]
   MF$drop.unused.levels <- TRUE
-
+  
   ## Processing formula
   Fo <- as.Formula(formula)
   if (length(Fo)[2] < 2) {
@@ -156,23 +188,18 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
     }
   }
   MF$formula <- Fo
-
+  
   ## Model.frame: Convert MF into a data matrix.
   MF[[1]] <- as.name("model.frame")
   MF <- eval(MF, parent.frame())
-
+  
   ## Extract terms (covariate matrices and response vector)
-  # MTerms = terms(Fo, data = data)
   MTerms_x <- stats::terms(Fo, data = data, rhs = 1)
   MTerms_v <- stats::delete.response(stats::terms(Fo, data = data, rhs = 2))
   z <- stats::model.response(MF, "numeric")
   x <- stats::model.matrix(MTerms_x, MF)
   v <- stats::model.matrix(MTerms_v, MF)
   
-  ## Check for intercepts:
-  intercept_x <- attr(stats::terms(Fo, rhs = 1), "intercept")
-  intercept_v <- attr(stats::terms(Fo, rhs = 2), "intercept")
-  intercept <- c(intercept_x, intercept_v)
   
   object <- bbreg.fit(z=z,x=x,v=v,link.mean = link.mean, link.precision = link.precision,
                       model = model, residual = residual, envelope = envelope, prob = prob,
@@ -183,6 +210,8 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
   object$levels <- list(mean = stats::.getXlevels(MTerms_x, MF), precision = stats::.getXlevels(MTerms_v, MF))
   object$contrasts <- list(mean = attr(x, "contrasts"), precision = attr(v, "contrasts"))
   
+  class(object) <- "bbreg"
+  
   return(object)
   
 }
@@ -192,9 +221,9 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
 #' @export
 
 bbreg.fit <- function(z, x, v = NULL, link.mean = c("logit", "probit", "cauchit", "cloglog"),
-                  link.precision = c("identity", "log", "sqrt"),
-                  model = NULL, residual = NULL, envelope = 0, prob = 0.95, predict = 0, 
-                  ptest = 0.25, epsilon = 10^(-5)) {
+                      link.precision = c("identity", "log", "sqrt"),
+                      model = NULL, residual = NULL, envelope = 0, prob = 0.95, predict = 0, 
+                      ptest = 0.25, epsilon = 10^(-5)) {
   n <- length(z)
   x = as.matrix(x)
   if(is.null(v)){
@@ -522,6 +551,7 @@ bbreg.fit <- function(z, x, v = NULL, link.mean = c("logit", "probit", "cauchit"
   }
   object$RSS_pred <- RSS_pred
   ###############
-  class(object) <- "bbreg"
+  
+  class(object) <- "bbreg_fit"
   return(object)
 }

@@ -29,25 +29,25 @@ D2Q_Obs_Fisher_bes <- function(theta, z, x, v, link.mean, link.precision) {
   dphideta <- link_precision$mu.eta(v %*% lam)
   d2mu <- d2mudeta2(link.mean, mu)
   d2phi <- d2phideta2(link.precision, phi)
-
+  
   auxKK1 <- ((1 - 2 * mu * (1 - mu)) / (mu^2 * ((1 - mu)^2)) + wz * phi^2 / (z * (1 - z))) * dmudeta^2
   auxKK2 <- ((2 * mu - 1) / (mu * (1 - mu)) - wz * phi^2 * xit) * d2mu
   KK <- diag(c(auxKK1 + auxKK2))
-
+  
   auxLL1 <- (2 / (phi^2) + wz * xi2) * dphideta^2
   auxLL2 <- (wz * phi * xi2 - 2 / phi - 1) * d2phi
   LL <- diag(c(auxLL1 + auxLL2))
-
+  
   auxKL <- -2 * phi * wz * xit * dmudeta * dphideta
   KL <- diag(c(auxKL))
-
+  
   D2QKappa <- (t(x) %*% KK) %*% x
   D2QKL <- (t(x) %*% KL) %*% v
   D2QKappa <- cbind(D2QKappa, D2QKL)
   D2QLambda <- (t(v) %*% LL) %*% v
   D2QLambda <- cbind(t(D2QKL), D2QLambda)
   D2Q <- rbind(D2QKappa, D2QLambda)
-
+  
   return(D2Q)
 }
 
@@ -82,16 +82,16 @@ DQ2_Obs_Fisher_bes <- function(theta, z, x, v, link.mean, link.precision) {
   dphideta <- link_precision$mu.eta(v %*% lam)
   d2mu <- d2mudeta2(link.mean, mu)
   d2phi <- d2phideta2(link.precision, phi)
-
+  
   grad1 <- c(((1 - 2 * mu) / (mu * (1 - mu)) + wz * (phi^2) * ((z - mu) / (z * (1 - z)))) * dmudeta)
   grad2 <- c(((2 / phi) + 1 - wz * phi * xi2) * dphideta)
-
+  
   aux_KK <- (((1 - 2 * mu) / (mu * (1 - mu)))^2 + 2 * xit * wz * phi^2 * (1 - 2 * mu) / (z * (1 - z)) + chi * phi^4 * xit^2) * dmudeta^2
-
+  
   aux_KL <- (((1 - 2 * mu) / (mu * (1 - mu))) * (2 / phi + 1 - wz * phi * xi2) + phi^2 * xit * (wz * (2 / phi + 1) - chi * phi * xi2)) * dmudeta * dphideta
-
+  
   aux_LL <- ((2 / phi + 1)^2 - 2 * wz * phi * (2 / phi + 1) * xi2 + chi * phi^2 * xi2^2) * dphideta^2
-
+  
   KK_temp <- grad1 %*% t(grad1)
   diag(KK_temp) <- c(aux_KK)
   DQ2Kappa <- (t(x) %*% KK_temp) %*% x
@@ -101,7 +101,7 @@ DQ2_Obs_Fisher_bes <- function(theta, z, x, v, link.mean, link.precision) {
   LL_temp <- grad2 %*% t(grad2)
   diag(LL_temp) <- c(aux_LL)
   DQ2Lambda <- (t(v) %*% LL_temp) %*% v
-
+  
   DQ21 <- cbind(DQ2Kappa, DQKL)
   DQ22 <- cbind(t(DQKL), DQ2Lambda)
   DQ2 <- rbind(DQ21, DQ22)
@@ -201,7 +201,7 @@ Qf_bes <- function(theta, wz, z, x, v, link.mean, link.precision) {
   #
   out1 <- log(mu) + log(1 - mu) + 2 * log(phi) + phi
   out2 <- 0.5 * wz * (phi^2) * (((mu^2) / z) + (((1 - mu)^2) / (1 - z)))
-
+  
   return(sum(out1 - out2))
 }
 
@@ -239,7 +239,7 @@ gradtheta_bes <- function(theta, wz, z, x, v, link.mean, link.precision) {
   aux <- (2 / phi) + 1 - wz * phi * (1 + ((z - mu)^2) / (z * (1 - z)))
   aux <- aux * dphideta
   Ulam <- t(v) %*% aux
-
+  
   return(c(Ukap, Ulam))
 }
 
@@ -267,7 +267,7 @@ EMrun_bes <- function(kap, lam, z, x, v, epsilon, link.mean, link.precision) {
   phi <- link_precision$linkinv(v %*% lam) # phi precision parameter.
   theta <- c(kap, lam)
   count <- 0
-
+  
   repeat{
     theta_r <- theta
     kap <- theta[1:nkap]
@@ -313,12 +313,12 @@ EMrun_bes <- function(kap, lam, z, x, v, epsilon, link.mean, link.precision) {
     }
     ### -------------------------------------
   }
-
+  
   if (sum(phi <= 0) > 0) {
     stop("one or more estimates of precision parameters were negative. Please, 
          use another link function for the precision parameter.")
   }
-
+  
   gphi <- (1 - phi + (phi^2) * exp(phi) * expint_En(phi, order = 1)) / 2
   out <- list()
   out[[1]] <- c(kap, lam)
@@ -387,7 +387,7 @@ simdata_bes <- function(kap, lam, x, v, repetitions = 1, link.mean, link.precisi
   a <- mu * phi
   b <- phi * (1 - mu)
   n <- length(a)
-
+  
   Z <- lapply(1:repetitions, function(x) {
     Y1 <- rinvgauss(n, mean = a, shape = a^2)
     Y2 <- rinvgauss(n, mean = b, shape = b^2)
@@ -417,35 +417,35 @@ simdata_bes <- function(kap, lam, x, v, repetitions = 1, link.mean, link.precisi
 envelope_bes <- function(residual, kap, lam, x, v, nsim_env, prob, n, epsilon, link.mean, link.precision) {
   zsim <- simdata_bes(kap, lam, x, v, nsim_env, link.mean, link.precision)
   Res <- switch(residual,
-    pearson = {
-      Res <- pblapply(zsim, function(zs) {
-        est <- EMrun_bes(kap, lam, z = zs, x, v, epsilon, link.mean, link.precision)$mu_gphi
-        musim <- est[, 1]
-        gpsim <- est[, 2]
-        (zs - musim) / (sqrt(gpsim * musim * (1 - musim)))
-      })
-      Res
-    },
-    score = {
-      nkap <- length(kap)
-      Res <- pblapply(zsim, function(zs) {
-        est <- EMrun_bes(kap, lam, z = zs, x, v, epsilon, link.mean, link.precision)$coeff
-        kapsim <- est[1:nkap]
-        lamsim <- est[-(1:nkap)]
-        score_residual_bes(kapsim, lamsim, zs, x, v, link.mean, link.precision)
-      })
-      Res
-    },
-    quantile = {
-      nkap <- length(kap)
-      Res <- pblapply(zsim, function(zs) {
-        est <- EMrun_bes(kap, lam, z = zs, x, v, epsilon, link.mean, link.precision)$coeff
-        kapsim <- est[1:nkap]
-        lamsim <- est[-(1:nkap)]
-        quantile_residual_bes(kapsim, lamsim, zs, x, v, link.mean, link.precision)
-      })
-      Res
-    }
+                pearson = {
+                  Res <- pblapply(zsim, function(zs) {
+                    est <- EMrun_bes(kap, lam, z = zs, x, v, epsilon, link.mean, link.precision)$mu_gphi
+                    musim <- est[, 1]
+                    gpsim <- est[, 2]
+                    (zs - musim) / (sqrt(gpsim * musim * (1 - musim)))
+                  })
+                  Res
+                },
+                score = {
+                  nkap <- length(kap)
+                  Res <- pblapply(zsim, function(zs) {
+                    est <- EMrun_bes(kap, lam, z = zs, x, v, epsilon, link.mean, link.precision)$coeff
+                    kapsim <- est[1:nkap]
+                    lamsim <- est[-(1:nkap)]
+                    score_residual_bes(kapsim, lamsim, zs, x, v, link.mean, link.precision)
+                  })
+                  Res
+                },
+                quantile = {
+                  nkap <- length(kap)
+                  Res <- pblapply(zsim, function(zs) {
+                    est <- EMrun_bes(kap, lam, z = zs, x, v, epsilon, link.mean, link.precision)$coeff
+                    kapsim <- est[1:nkap]
+                    lamsim <- est[-(1:nkap)]
+                    quantile_residual_bes(kapsim, lamsim, zs, x, v, link.mean, link.precision)
+                  })
+                  Res
+                }
   )
   Res <- t(matrix(unlist(Res), n, nsim_env))
   Res <- t(apply(Res, 1, sort))
@@ -500,15 +500,15 @@ pred_accuracy_bes <- function(residual, kap, lam, z, x, v, ntest, predict, epsil
     phipred <- link_precision$linkinv(vte %*% lamtr)
     gphi_pred <- (1 - phipred + (phipred^2) * exp(phipred) * expint_En(phipred, order = 1)) / 2
     respred <- switch(residual,
-      pearson = {
-        (zte - mupred) / sqrt(gphi_pred * mupred * (1 - mupred))
-      },
-      score = {
-        score_residual_bes(kaptr, lamtr, zte, xte, vte, link.mean, link.precision)
-      },
-      quantile = {
-        quantile_residual_bes(kaptr, lamtr, zte, xte, vte, link.mean, link.precision)
-      }
+                      pearson = {
+                        (zte - mupred) / sqrt(gphi_pred * mupred * (1 - mupred))
+                      },
+                      score = {
+                        score_residual_bes(kaptr, lamtr, zte, xte, vte, link.mean, link.precision)
+                      },
+                      quantile = {
+                        quantile_residual_bes(kaptr, lamtr, zte, xte, vte, link.mean, link.precision)
+                      }
     )
     RSS_pred[i] <- sum(respred^2)
     if (predict >= 50) {
@@ -616,10 +616,10 @@ qbessel <- function(p, mu = 1/2, phi = 1){
     if(x < 0 | x > 1){
       warn_qbessel <- TRUE
       return(NaN)} else{
-      return(stats::uniroot(function(y) {
-        pbessel(y, mu=mu,phi=phi) - x
-      },lower = 0, upper = 1)$root)
-    }
+        return(stats::uniroot(function(y) {
+          pbessel(y, mu=mu,phi=phi) - x
+        },lower = 0, upper = 1)$root)
+      }
   }
   )
   if(any(is.nan(quant_bessel))){
