@@ -2,11 +2,27 @@
 % Please edit documentation in R/EM_bbreg.R
 \name{bbreg}
 \alias{bbreg}
-\title{bbreg}
+\alias{bbreg.fit}
+\title{Bessel and Beta Regression Models}
 \usage{
 bbreg(
   formula,
   data,
+  link.mean = c("logit", "probit", "cauchit", "cloglog"),
+  link.precision = c("identity", "log", "sqrt"),
+  model = NULL,
+  residual = NULL,
+  envelope = 0,
+  prob = 0.95,
+  predict = 0,
+  ptest = 0.25,
+  epsilon = 10^(-5)
+)
+
+bbreg.fit(
+  z,
+  x,
+  v = NULL,
   link.mean = c("logit", "probit", "cauchit", "cloglog"),
   link.precision = c("identity", "log", "sqrt"),
   model = NULL,
@@ -52,6 +68,12 @@ The partitions are randomly defined when predict is set as a positive integer.}
 If predict = 0, ptest is ignored.}
 
 \item{epsilon}{tolerance value to control the convergence criterion in the EM-algorithm (default = 10^(-5)).}
+
+\item{z}{vector of response variables with length \code{n}. Each coordinate must belong to the standard unit interval (0,1).}
+
+\item{x}{matrix of covariates with respect to the mean with dimension \code{(n,nkap)}.}
+
+\item{v}{matrix of covariates with respect to the precision parameter. The default is \code{NULL}. If not \code{NULL} must be of dimension \code{(n,nlam)}.}
 }
 \value{
 Object of class \pkg{bbreg} containing the outputs from the model fit (bessel or beta regression).
@@ -145,6 +167,7 @@ fit5 <- bbreg(agreement ~ priming + eliciting | eliciting,
 )
 summary(fit5)
 }
+
 }
 \references{
 arXiv:2003.05157 (\href{https://arxiv.org/abs/2003.05157}{Barreto-Souza, Mayrink and Simas; 2020})

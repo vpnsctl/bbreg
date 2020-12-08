@@ -7,7 +7,7 @@
 [![](http://cranlogs.r-pkg.org/badges/last-month/bbreg?color=orange)](https://cran.r-project.org/package=bbreg)
 ---
 ### Dev badges:
-[![](https://img.shields.io/badge/devel%20version-2.0.3-blue.svg)](https://github.com/vpnsctl/bbreg/main)
+[![](https://img.shields.io/badge/devel%20version-2.0.4-blue.svg)](https://github.com/vpnsctl/bbreg/main)
 [![R build status](https://github.com/vpnsctl/bbreg/workflows/R-CMD-check/badge.svg)](https://github.com/vpnsctl/bbreg/actions)
 [![Build Status](https://travis-ci.com/vpnsctl/bbreg.svg?branch=main)](https://travis-ci.com/vpnsctl/bbreg)
 ---

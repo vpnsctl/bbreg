@@ -52,7 +52,54 @@ dbbtest <- function(formula, data, epsilon = 10^(-5), link.mean, link.precision)
   z <- stats::model.response(MF, "numeric")
   x <- stats::model.matrix(MTerms_x, MF)
   v <- stats::model.matrix(MTerms_v, MF)
+  
+  out <- dbbtest.fit(z = z,x = x,v = v, epsilon = epsilon, 
+                     link.mean = link.mean, 
+                     link.precision = link.precision)
+  return(out)
+}
+
+
+#############################################################################################
+#' @title dbbtest.fit
+#' @description Function to run the discrimination test between beta and bessel regressions (DBB).
+#' @param z vector of response variables with length \code{n}. Each coordinate must belong to the standard unit interval (0,1). 
+#' @param x matrix of covariates with respect to the mean with dimension \code{(n,nkap)}.
+#' @param v matrix of covariates with respect to the precision parameter. The default is \code{NULL}. If not \code{NULL} must be of dimension \code{(n,nlam)}.
+#' @param epsilon tolerance value to control the convergence criterion in the Expectation-Maximization algorithm (default = 10^(-5)).
+#' @param link.mean a string containing the link function for the mean.
+#' The possible link functions for the mean are "logit","probit", "cauchit", "cloglog".
+#' @param link.precision a string containing the link function the precision parameter.
+#' The possible link functions for the precision parameter are "identity", "log", "sqrt".
+#' @return Object of class dbbtest, which is a list containing two elements. The 1st one is a table of terms
+#' considered in the decision rule of the test; they are sum(z2/n) = sum_{i=1}^{n}(z_i^2)/n, sum(quasi_mu) = sum_{i=1}^{n}(tilde{mu_i}^2 + tilde{mu_i}(1-tilde{mu_i})/2)
+#' |D_bessel| and |D_beta| as indicated in the main reference. The 2nd term of the list is the name of the selected model (bessel or beta).
+#' @seealso
+#' \code{\link{simdata_bes}}, \code{\link{dbbtest}}, \code{\link{simdata_bet}}
+#' @examples
+#' # Illustration using the Weather task data set available in the bbreg package.
+#' n <- 100
+#' x <- cbind(rbinom(n, 1, 0.5), runif(n, -1, 1))
+#' v <- runif(n, -1, 1)
+#' z <- simdata_bes(
+#'   kap = c(1, -1, 0.5), lam = c(0.5, -0.5), x, v,
+#'   repetition = 1, link.mean = "logit", link.precision = "log"
+#' )
+#' z <- unlist(z)
+#' dbbtest.fit(z = z, x = x ,v = v, link.mean = "logit", link.precision = "identity")
+#' @export
+dbbtest.fit <- function(z,x,v = NULL, epsilon = 10^(-5), link.mean, link.precision) {
+  link_mean <- stats::make.link(link.mean)
+  link_precision <- stats::make.link(link.precision)
+  
+  x <- as.matrix(x)
+  
   n <- length(z)
+  if(is.null(v)){
+    v = matrix(rep(1,n), nrow = n)
+  } else{
+    v = as.matrix(v)
+  }
   nkap <- ncol(x)
   nlam <- ncol(v)
   if (nkap == 0) {
@@ -118,6 +165,10 @@ dbbtest <- function(formula, data, epsilon = 10^(-5), link.mean, link.precision)
   class(out) <- "dbbtest"
   return(out)
 }
+
+
+
+
 
 #############################################################################################
 #' @title Qf_bes_dbb

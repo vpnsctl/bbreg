@@ -1,5 +1,7 @@
 #############################################################################################
-#' @title bbreg
+#' @name bbreg
+#' @title Bessel and Beta Regression Models
+#' @aliases bbreg bbreg.fit
 #' @description Function to fit, via Expectation-Maximization (EM) algorithm, the bessel or the beta regression to a given data set with a bounded continuous response variable.
 #' @param formula symbolic description of the model (examples: \code{z ~ x1 + x2} and \code{z ~ x1 + x2 | v1 + v2}); see details below.
 #' @param data elements expressed in formula. This is usually a data frame composed by:
@@ -8,6 +10,9 @@
 #' (iii) covariates for the precision submodel (columns \code{v1} and \code{v2}).
 #' @param model character ("bessel" or "beta") indicating the type of model to be fitted. The default is NULL,
 #' meaning that a discrimination test must be applied to select the model.
+#' @param z vector of response variables with length \code{n}. Each coordinate must belong to the standard unit interval (0,1). 
+#' @param x matrix of covariates with respect to the mean with dimension \code{(n,nkap)}.
+#' @param v matrix of covariates with respect to the precision parameter. The default is \code{NULL}. If not \code{NULL} must be of dimension \code{(n,nlam)}.
 #' @param residual character indicating the type of residual to be evaluated ("pearson", "score" or "quantile"). The default is "pearson".
 #' @param envelope number of simulations (synthetic data sets) to build envelopes for residuals (with \code{100*prob\%} confidence level).
 #' The default \code{envelope = 0} dismisses the envelope analysis.
@@ -123,6 +128,8 @@
 #' )
 #' summary(fit5)
 #' }
+#' 
+#' @rdname bbreg
 #' @export
 bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cloglog"),
                   link.precision = c("identity", "log", "sqrt"),
@@ -161,16 +168,56 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
   z <- stats::model.response(MF, "numeric")
   x <- stats::model.matrix(MTerms_x, MF)
   v <- stats::model.matrix(MTerms_v, MF)
+  
+  ## Check for intercepts:
+  intercept_x <- attr(stats::terms(Fo, rhs = 1), "intercept")
+  intercept_v <- attr(stats::terms(Fo, rhs = 2), "intercept")
+  intercept <- c(intercept_x, intercept_v)
+  
+  object <- bbreg.fit(z=z,x=x,v=v,link.mean = link.mean, link.precision = link.precision,
+                      model = model, residual = residual, envelope = envelope, prob = prob,
+                      predict = predict, ptest = ptest, epsilon = epsilon)
+  
+  object$call <- Fo
+  object$terms <- list(mean = MTerms_x, precision = MTerms_v)
+  object$levels <- list(mean = stats::.getXlevels(MTerms_x, MF), precision = stats::.getXlevels(MTerms_v, MF))
+  object$contrasts <- list(mean = attr(x, "contrasts"), precision = attr(v, "contrasts"))
+  
+  return(object)
+  
+}
+
+
+#' @rdname bbreg
+#' @export
+
+bbreg.fit <- function(z, x, v = NULL, link.mean = c("logit", "probit", "cauchit", "cloglog"),
+                  link.precision = c("identity", "log", "sqrt"),
+                  model = NULL, residual = NULL, envelope = 0, prob = 0.95, predict = 0, 
+                  ptest = 0.25, epsilon = 10^(-5)) {
   n <- length(z)
+  x = as.matrix(x)
+  if(is.null(v)){
+    v = matrix(rep(1,n), nrow = n)
+  } else{
+    v = as.matrix(v)
+  }
   nkap <- ncol(x)
   nlam <- ncol(v)
+  
+  ## Check for intercepts:
+  intercept_x <- sum(colSums(x==1)==n) > 0
+  intercept_v <- sum(colSums(v==1)==n) > 0
+  intercept <- c(intercept_x, intercept_v)
+  
+  
   if (nkap == 0) {
     stop("empty matrix x is not allowed")
   }
   if (nlam == 0) {
     stop("empty matrix v is not allowed")
   }
-
+  
   ## Validation of input variables and arguments.
   if (n < 1) {
     stop("response variable is not provided")
@@ -227,7 +274,7 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
   if (epsilon < 0) {
     stop("consider epsilon > 0")
   }
-
+  
   ## Set ntest (size of the test set) when "prediction > 0"
   if (predict > 0) {
     ntest <- round(ptest * n)
@@ -236,22 +283,17 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
       warning("size of the test set is near 0 or n (RSS_pred is not calculated)")
     }
   }
-
-  ## Check for intercepts:
-  intercept_x <- attr(stats::terms(Fo, rhs = 1), "intercept")
-  intercept_v <- attr(stats::terms(Fo, rhs = 2), "intercept")
-  intercept <- c(intercept_x, intercept_v)
-
+  
   ## Checking and processing link functions
   if (length(link.mean) > 1) {
     link.mean <- link.mean[1]
   }
   possible_link_mean <- c("logit", "probit", "cauchit", "cloglog")
-
+  
   if (!(link.mean %in% possible_link_mean)) {
     stop(paste0("link function for the mean must be one of ", possible_link_mean))
   }
-
+  
   if (length(link.precision) > 1) {
     if (nlam == 1 & intercept_v) {
       link.precision <- link.precision[1]
@@ -260,13 +302,13 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
     }
   }
   possible_link_precision <- c("identity", "log", "sqrt")
-
+  
   if (!(link.precision %in% possible_link_precision)) {
     stop(paste0("link function for the precision parameter must be one of ", possible_link_precision))
   }
-
+  
   ## Set initial values.
-
+  
   ## EM algorithm
   if (is.character(model) == TRUE) {
     aux <- match.arg(model, c("bessel", "beta"))
@@ -282,7 +324,7 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
       message <- paste0(modelname, " via EM - Ignoring the Discrimination test (DBB)")
       inits <- list(kap, lam)
       EM <- EMrun_bes(kap, lam, z, x, v, epsilon, link.mean, link.precision)
-
+      
       niter <- EM[[3]] # number of iterations of the EM algorithm
       Est <- EM[[1]] # coefficients
       kap <- Est[1:nkap]
@@ -320,7 +362,7 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
       start <- c(kap, lam)
       names(start) = c(colnames(x), paste(colnames(v),".precision", sep = ""))
       #names(start) <- c(paste0("kappa[", 1:nkap, "]"), paste0("lambda[", 1:nlam, "]"))
-
+      
       modelname <- "Beta regression"
       message <- paste0(modelname, " via EM - Ignoring the Discrimination test (DBB)")
       EM <- EMrun_bet(kap, lam, z, x, v, epsilon, link.mean, link.precision)
@@ -357,7 +399,7 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
   }
   if (is.null(model)) {
     # run the discrimination
-    aux <- dbbtest(formula, data, epsilon, link.mean, link.precision)
+    aux <- dbbtest.fit(z, x, v, epsilon, link.mean, link.precision)
     # fit the chosen model
     if (aux[[2]] == "bessel") {
       start <- startvalues(z, x, v, link.mean, link.precision, "bessel")
@@ -366,7 +408,7 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
       start <- c(kap, lam)
       names(start) = c(colnames(x), paste(colnames(v),".precision", sep = ""))
       #names(start) <- c(paste0("kappa[", 1:nkap, "]"), paste0("lambda[", 1:nlam, "]"))
-
+      
       modelname <- "Bessel regression"
       message <- paste0(modelname, " via EM - Model selected via Discrimination test (DBB)")
       EM <- EMrun_bes(kap, lam, z, x, v, epsilon, link.mean, link.precision)
@@ -407,7 +449,7 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
       start <- c(kap, lam)
       names(start) = c(colnames(x), paste(colnames(v),".precision", sep = ""))
       #names(start) <- c(paste0("kappa[", 1:nkap, "]"), paste0("lambda[", 1:nlam, "]"))
-
+      
       modelname <- "Beta regression"
       message <- paste0(modelname, " via EM - Model selected via Discrimination test (DBB)")
       EM <- EMrun_bet(kap, lam, z, x, v, epsilon, link.mean, link.precision)
@@ -451,7 +493,7 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
   
   ###############
   object <- list()
-  object$call <- Fo
+  object$call <- NULL
   object$modelname <- modelname
   object$message <- message
   object$residualname <- residual
@@ -460,9 +502,6 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
   object$intercept <- intercept
   object$link.mean <- link.mean
   object$link.precision <- link.precision
-  object$terms <- list(mean = MTerms_x, precision = MTerms_v)
-  object$levels <- list(mean = stats::.getXlevels(MTerms_x, MF), precision = stats::.getXlevels(MTerms_v, MF))
-  object$contrasts <- list(mean = attr(x, "contrasts"), precision = attr(v, "contrasts"))
   object$kappa <- kap
   object$lambda <- lam
   object$mu <- mu
