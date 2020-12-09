@@ -3,7 +3,6 @@
 * Created the function bbreg.fit
 * Improving documentation
 * Improving file organization
-* Improved the optimization algorithm
 
 # bbreg 2.0.3
 
