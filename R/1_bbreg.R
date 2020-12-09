@@ -29,6 +29,7 @@
 #' @param link.precision optionally, a string containing the link function the precision parameter. If omitted and the only precision
 #' covariate is the intercept, the 'identity' link function will be used, if omitted and there is a precision covariate other than the
 #' intercept, the 'log' link function will be used. The possible link functions for the precision parameter are "identity", "log", "sqrt".
+#' @param optim_method main optimization algorithm to be used. The available methods are the same as those of \code{optim} function. The default is set to "L-BFGS-B".
 #' @return \code{bbreg} returns an object of class "bbreg". The function \code{bbreg.fit} returns an object of class "bbreg_fit".
 #' The objects of classes \code{bbreg} and \code{bbreg_fit} return lists containing:
 #' 
@@ -166,7 +167,8 @@
 bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cloglog"),
                   link.precision = c("identity", "log", "sqrt"),
                   model = NULL, residual = NULL, envelope = 0, prob = 0.95, predict = 0, 
-                  ptest = 0.25, epsilon = 10^(-5)) {
+                  ptest = 0.25, epsilon = 10^(-5),
+                  optim_method = "L-BFGS-B") {
   ## Processing call
   # If data is not provided, verify the current R workspace
   if (missing(data)) {
@@ -223,7 +225,7 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
 bbreg.fit <- function(z, x, v = NULL, link.mean = c("logit", "probit", "cauchit", "cloglog"),
                       link.precision = c("identity", "log", "sqrt"),
                       model = NULL, residual = NULL, envelope = 0, prob = 0.95, predict = 0, 
-                      ptest = 0.25, epsilon = 10^(-5)) {
+                      ptest = 0.25, epsilon = 10^(-5), optim_method = "L-BFGS-B") {
   n <- length(z)
   x = as.matrix(x)
   if(is.null(v)){
@@ -352,7 +354,7 @@ bbreg.fit <- function(z, x, v = NULL, link.mean = c("logit", "probit", "cauchit"
       modelname <- "Bessel regression"
       message <- paste0(modelname, " via EM - Ignoring the Discrimination test (DBB)")
       inits <- list(kap, lam)
-      EM <- EMrun_bes(kap, lam, z, x, v, epsilon, link.mean, link.precision)
+      EM <- EMrun_bes(kap, lam, z, x, v, epsilon, link.mean, link.precision, optim_method)
       
       niter <- EM[[3]] # number of iterations of the EM algorithm
       Est <- EM[[1]] # coefficients
@@ -394,7 +396,7 @@ bbreg.fit <- function(z, x, v = NULL, link.mean = c("logit", "probit", "cauchit"
       
       modelname <- "Beta regression"
       message <- paste0(modelname, " via EM - Ignoring the Discrimination test (DBB)")
-      EM <- EMrun_bet(kap, lam, z, x, v, epsilon, link.mean, link.precision)
+      EM <- EMrun_bet(kap, lam, z, x, v, epsilon, link.mean, link.precision, optim_method)
       niter <- EM[[3]] # number of iterations of the EM algorithm
       Est <- EM[[1]] # coefficients
       kap <- Est[1:nkap]
@@ -428,7 +430,7 @@ bbreg.fit <- function(z, x, v = NULL, link.mean = c("logit", "probit", "cauchit"
   }
   if (is.null(model)) {
     # run the discrimination
-    aux <- dbbtest.fit(z, x, v, epsilon, link.mean, link.precision)
+    aux <- dbbtest.fit(z, x, v, epsilon, link.mean, link.precision, optim_method)
     # fit the chosen model
     if (aux[[2]] == "bessel") {
       start <- startvalues(z, x, v, link.mean, link.precision, "bessel")
@@ -440,7 +442,7 @@ bbreg.fit <- function(z, x, v = NULL, link.mean = c("logit", "probit", "cauchit"
       
       modelname <- "Bessel regression"
       message <- paste0(modelname, " via EM - Model selected via Discrimination test (DBB)")
-      EM <- EMrun_bes(kap, lam, z, x, v, epsilon, link.mean, link.precision)
+      EM <- EMrun_bes(kap, lam, z, x, v, epsilon, link.mean, link.precision, optim_method)
       niter <- EM[[3]] # number of iterations of the EM algorithm
       Est <- EM[[1]] # coefficients
       kap <- Est[1:nkap]
@@ -481,7 +483,7 @@ bbreg.fit <- function(z, x, v = NULL, link.mean = c("logit", "probit", "cauchit"
       
       modelname <- "Beta regression"
       message <- paste0(modelname, " via EM - Model selected via Discrimination test (DBB)")
-      EM <- EMrun_bet(kap, lam, z, x, v, epsilon, link.mean, link.precision)
+      EM <- EMrun_bet(kap, lam, z, x, v, epsilon, link.mean, link.precision, optim_method)
       niter <- EM[[3]] # number of iterations of the EM algorithm
       Est <- EM[[1]] # coefficients
       kap <- Est[1:nkap]

@@ -136,6 +136,9 @@ infmat_bes <- function(theta, z, x, v, link.mean, link.precision, information = 
       out <- sqrt(diag(inv.aux))
     } # Standard error.
   }
+  if(sum(is.nan(out))>0){
+    warning("Please, try another optimization method.'")
+  }
   return(out)
 }
 
@@ -256,8 +259,9 @@ gradtheta_bes <- function(theta, wz, z, x, v, link.mean, link.precision) {
 #' The possible link functions for the mean are "logit","probit", "cauchit", "cloglog".
 #' @param link.precision a string containing the link function the precision parameter.
 #' The possible link functions for the precision parameter are "identity", "log", "sqrt".
+#' @param optim_method main optimization algorithm to be used. The available methods are the same as those of \code{optim} function. The default is set to "L-BFGS-B".
 #' @return Vector containing the estimates for kappa and lambda in the bessel regression.
-EMrun_bes <- function(kap, lam, z, x, v, epsilon, link.mean, link.precision) {
+EMrun_bes <- function(kap, lam, z, x, v, epsilon, link.mean, link.precision, optim_method = "L-BFGS-B") {
   n <- length(z)
   nkap <- ncol(x)
   nlam <- ncol(v)
@@ -288,10 +292,56 @@ EMrun_bes <- function(kap, lam, z, x, v, epsilon, link.mean, link.precision) {
       link.mean = link.mean,
       link.precision = link.precision,
       control = list(fnscale = -1),
-      method = "L-BFGS-B"
+      method = optim_method
     ), error = function(e) {
       "Error"
     })
+    
+    if (length(M) == 1) {
+      warning("Trying with numerical derivatives")
+      M <- tryCatch(stats::optim(
+        par = theta,
+        fn = Qf_bes,
+        gr = NULL,
+        wz = wz_r,
+        z = z,
+        x = x,
+        v = v,
+        link.mean = link.mean,
+        link.precision = link.precision,
+        control = list(fnscale = -1),
+        method = optim_method
+      ), error = function(e) {
+        "Error"
+      })
+    }
+    
+    if (length(M) == 1) {
+      warning("Trying with another optimization algorithm")
+      if(optim_method == "L-BFGS-B"){
+        optim_temp = "Nelder-Mead"
+      } else if(optim_method == "Nelder-Mead"){
+        optim_temp = "L-BFGS-B"
+      } else {
+        optim_temp = "Nelder-Mead"
+      }
+      M <- tryCatch(stats::optim(
+        par = theta,
+        fn = Qf_bes,
+        gr = NULL,
+        wz = wz_r,
+        z = z,
+        x = x,
+        v = v,
+        link.mean = link.mean,
+        link.precision = link.precision,
+        control = list(fnscale = -1),
+        method = optim_temp
+      ), error = function(e) {
+        "Error"
+      })
+    }
+    
     if (length(M) == 1) {
       warning("The EM algorithm did not converge.")
       break

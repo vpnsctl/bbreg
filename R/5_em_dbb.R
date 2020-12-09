@@ -11,6 +11,7 @@
 #' The possible link functions for the mean are "logit","probit", "cauchit", "cloglog".
 #' @param link.precision a string containing the link function the precision parameter.
 #' The possible link functions for the precision parameter are "identity", "log", "sqrt".
+#' @param optim_method main optimization algorithm to be used. The available methods are the same as those of \code{optim} function. The default is set to "L-BFGS-B".
 #' @return Object of class dbbtest, which is a list containing two elements. The 1st one is a table of terms
 #' considered in the decision rule of the test; they are sum(z2/n) = sum_{i=1}^{n}(z_i^2)/n, sum(quasi_mu) = sum_{i=1}^{n}(tilde{mu_i}^2 + tilde{mu_i}(1-tilde{mu_i})/2)
 #' |D_bessel| and |D_beta| as indicated in the main reference. The 2nd term of the list is the name of the selected model (bessel or beta).
@@ -23,7 +24,7 @@
 #'   link.mean = "logit", link.precision = "identity"
 #' )
 #' @export
-dbbtest <- function(formula, data, epsilon = 10^(-5), link.mean, link.precision) {
+dbbtest <- function(formula, data, epsilon = 10^(-5), link.mean, link.precision, optim_method = "L-BFGS-B") {
   link_mean <- stats::make.link(link.mean)
   link_precision <- stats::make.link(link.precision)
   ## Processing call
@@ -55,7 +56,7 @@ dbbtest <- function(formula, data, epsilon = 10^(-5), link.mean, link.precision)
   
   out <- dbbtest.fit(z = z,x = x,v = v, epsilon = epsilon, 
                      link.mean = link.mean, 
-                     link.precision = link.precision)
+                     link.precision = link.precision, optim_method)
   return(out)
 }
 
@@ -71,6 +72,7 @@ dbbtest <- function(formula, data, epsilon = 10^(-5), link.mean, link.precision)
 #' The possible link functions for the mean are "logit","probit", "cauchit", "cloglog".
 #' @param link.precision a string containing the link function the precision parameter.
 #' The possible link functions for the precision parameter are "identity", "log", "sqrt".
+#' @param optim_method main optimization algorithm to be used. The available methods are the same as those of \code{optim} function. The default is set to "L-BFGS-B".
 #' @return Object of class dbbtest, which is a list containing two elements. The 1st one is a table of terms
 #' considered in the decision rule of the test; they are sum(z2/n) = sum_{i=1}^{n}(z_i^2)/n, sum(quasi_mu) = sum_{i=1}^{n}(tilde{mu_i}^2 + tilde{mu_i}(1-tilde{mu_i})/2)
 #' |D_bessel| and |D_beta| as indicated in the main reference. The 2nd term of the list is the name of the selected model (bessel or beta).
@@ -88,7 +90,7 @@ dbbtest <- function(formula, data, epsilon = 10^(-5), link.mean, link.precision)
 #' z <- unlist(z)
 #' dbbtest.fit(z = z, x = x ,v = v, link.mean = "logit", link.precision = "identity")
 #' @export
-dbbtest.fit <- function(z,x,v = NULL, epsilon = 10^(-5), link.mean, link.precision) {
+dbbtest.fit <- function(z,x,v = NULL, epsilon = 10^(-5), link.mean, link.precision, optim_method = "L-BFGS-B") {
   link_mean <- stats::make.link(link.mean)
   link_precision <- stats::make.link(link.precision)
   
@@ -133,7 +135,7 @@ dbbtest.fit <- function(z,x,v = NULL, epsilon = 10^(-5), link.mean, link.precisi
     lam <- startvalues(z, x, v, link.mean, link.precision, "bessel")
     lam <- lam[[2]]
     #
-    EM <- EMrun_bes_dbb(lam, z, v, mu = muquasi, epsilon, link.precision)
+    EM <- EMrun_bes_dbb(lam, z, v, mu = muquasi, epsilon, link.precision, optim_method)
     phi <- link_precision$linkinv(v %*% EM)
     gphi <- (1 - phi + (phi^2) * exp(phi) * expint_En(phi, order = 1)) / 2
     Wbes <- gphi
@@ -141,7 +143,7 @@ dbbtest.fit <- function(z,x,v = NULL, epsilon = 10^(-5), link.mean, link.precisi
     lam <- startvalues(z, x, v, link.mean, link.precision, "beta")
     lam <- lam[[2]]
     #
-    EM <- EMrun_bet_dbb(lam, z, v, mu = muquasi, epsilon, link.precision)
+    EM <- EMrun_bet_dbb(lam, z, v, mu = muquasi, epsilon, link.precision, optim_method)
     phi <- link_precision$linkinv(v %*% EM)
     gphi <- 1 / (1 + phi)
     Wbet <- gphi
@@ -268,9 +270,10 @@ gradlam_bet_dbb <- function(lam, phiold, z, v, mu, link.precision) {
 #' @param mu mean parameter (vector having the same size of z).
 #' @param epsilon tolerance to controll convergence criterion.
 #' @param link.precision a string containing the link function the precision parameter.
+#' @param optim_method main optimization algorithm to be used. The available methods are the same as those of \code{optim} function. The default is set to "L-BFGS-B".
 #' The possible link functions for the precision parameter are "identity", "log", "sqrt".
 #' @return Vector containing the estimates for lam in the bessel regression.
-EMrun_bes_dbb <- function(lam, z, v, mu, epsilon, link.precision) {
+EMrun_bes_dbb <- function(lam, z, v, mu, epsilon, link.precision, optim_method = "L-BFGS-B") {
   link_precision <- stats::make.link(link.precision)
   phi <- link_precision$linkinv(v %*% lam) # phi precision parameter.
   count <- 0
@@ -282,10 +285,38 @@ EMrun_bes_dbb <- function(lam, z, v, mu, epsilon, link.precision) {
     ### M step ------------------------------
     M <- tryCatch(stats::optim(
       par = lam, fn = Qf_bes_dbb, gr = gradlam_bes_dbb, wz = wz_r, z = z, v = v,
-      mu = mu, link.precision = link.precision, control = list(fnscale = -1), method = "L-BFGS-B"
+      mu = mu, link.precision = link.precision, control = list(fnscale = -1), method = optim_method
     ), error = function(e) {
       "Error"
     })
+    
+    if (length(M) == 1) {
+      warning("Trying with numerical derivatives")
+      M <- tryCatch(stats::optim(
+        par = lam, fn = Qf_bes_dbb, gr = NULL, wz = wz_r, z = z, v = v,
+        mu = mu, link.precision = link.precision, control = list(fnscale = -1), method = optim_method
+      ), error = function(e) {
+        "Error"
+      })
+    }
+    
+    if (length(M) == 1) {
+      warning("Trying with another optimization algorithm")
+      if(optim_method == "L-BFGS-B"){
+        optim_temp = "Nelder-Mead"
+      } else if(optim_method == "Nelder-Mead"){
+        optim_temp = "L-BFGS-B"
+      } else {
+        optim_temp = "Nelder-Mead"
+      }
+
+      M <- tryCatch(stats::optim(
+        par = lam, fn = Qf_bes_dbb, gr = NULL, wz = wz_r, z = z, v = v,
+        mu = mu, link.precision = link.precision, control = list(fnscale = -1), method = optim_temp
+      ), error = function(e) {
+        "Error"
+      })
+    }
     if (length(M) == 1) {
       warning("The EM algorithm did not converge.")
       break
@@ -321,8 +352,9 @@ EMrun_bes_dbb <- function(lam, z, v, mu, epsilon, link.precision) {
 #' @param epsilon tolerance to controll convergence criterion.
 #' @param link.precision a string containing the link function the precision parameter.
 #' The possible link functions for the precision parameter are "identity", "log", "sqrt".
+#' @param optim_method main optimization algorithm to be used. The available methods are the same as those of \code{optim} function. The default is set to "L-BFGS-B".
 #' @return Vector containing the estimates for lam in the beta regression.
-EMrun_bet_dbb <- function(lam, z, v, mu, epsilon, link.precision) {
+EMrun_bet_dbb <- function(lam, z, v, mu, epsilon, link.precision, optim_method = "L-BFGS-B") {
   link_precision <- stats::make.link(link.precision)
   phi <- link_precision$linkinv(v %*% lam) # phi precision parameter.
   count <- 0
@@ -333,10 +365,37 @@ EMrun_bet_dbb <- function(lam, z, v, mu, epsilon, link.precision) {
     ### M step ------------------------------
     M <- tryCatch(stats::optim(
       par = lam, fn = Qf_bet_dbb, gr = gradlam_bet_dbb, phiold = phi_r, z = z, v = v, mu = mu,
-      link.precision = link.precision, control = list(fnscale = -1), method = "L-BFGS-B"
+      link.precision = link.precision, control = list(fnscale = -1), method = optim_method
     ), error = function(e) {
       "Error"
     })
+    
+    if (length(M) == 1) {
+      warning("Trying with numerical derivatives")
+      M <- tryCatch(stats::optim(
+        par = lam, fn = Qf_bet_dbb, gr = NULL, phiold = phi_r, z = z, v = v, mu = mu,
+        link.precision = link.precision, control = list(fnscale = -1), method = optim_method
+      ), error = function(e) {
+        "Error"
+      })
+    }
+    
+    if (length(M) == 1) {
+      warning("Trying with another optimization algorithm")
+      if(optim_method == "L-BFGS-B"){
+        optim_temp = "Nelder-Mead"
+      } else if(optim_method == "Nelder-Mead"){
+        optim_temp = "L-BFGS-B"
+      } else {
+        optim_temp = "Nelder-Mead"
+      }
+      M <- tryCatch(stats::optim(
+        par = lam, fn = Qf_bet_dbb, gr = NULL, phiold = phi_r, z = z, v = v, mu = mu,
+        link.precision = link.precision, control = list(fnscale = -1), method = optim_temp
+      ), error = function(e) {
+        "Error"
+      })
+    }
     if (length(M) == 1) {
       warning("The EM algorithm did not converge.")
       break
