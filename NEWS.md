@@ -1,8 +1,9 @@
 # bbreg 2.0.4
 
 * Created the function bbreg.fit
-* Improving documentation
-* Improving file organization
+* Improved documentation
+* Improved file organization
+* Improved the optimization algorithm
 
 # bbreg 2.0.3
 
