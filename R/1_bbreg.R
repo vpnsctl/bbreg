@@ -217,7 +217,7 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
   v <- stats::model.matrix(MTerms_v, MF)
   
   
-  object <- bbreg.fit(z=z,x=x,v=v,link.mean = link.mean, link.precision = link.precision,
+  object <- bbreg.fit(x=x,z=z,v=v,link.mean = link.mean, link.precision = link.precision,
                       model = model, residual = residual, envelope = envelope, prob = prob,
                       predict = predict, ptest = ptest, em_controls = em_controls, optim_method = optim_method, optim_controls = optim_controls)
   
@@ -236,7 +236,7 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
 #' @rdname bbreg
 #' @export
 
-bbreg.fit <- function(z, x, v = NULL, link.mean = c("logit", "probit", "cauchit", "cloglog"),
+bbreg.fit <- function(x, z, v = NULL, link.mean = c("logit", "probit", "cauchit", "cloglog"),
                       link.precision = c("identity", "log", "sqrt"),
                       model = NULL, residual = NULL, envelope = 0, prob = 0.95, predict = 0, 
                       ptest = 0.25, em_controls = list(maxit = 5000, em_tol = 10^(-5)), optim_method = "L-BFGS-B", optim_controls = list()) {
