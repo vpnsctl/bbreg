@@ -16,8 +16,9 @@ bbreg(
   prob = 0.95,
   predict = 0,
   ptest = 0.25,
-  epsilon = 10^(-5),
-  optim_method = "L-BFGS-B"
+  em_controls = list(maxit = 5000, em_tol = 10^(-5)),
+  optim_method = "L-BFGS-B",
+  optim_controls = list()
 )
 
 bbreg.fit(
@@ -32,8 +33,9 @@ bbreg.fit(
   prob = 0.95,
   predict = 0,
   ptest = 0.25,
-  epsilon = 10^(-5),
-  optim_method = "L-BFGS-B"
+  em_controls = list(maxit = 5000, em_tol = 10^(-5)),
+  optim_method = "L-BFGS-B",
+  optim_controls = list()
 )
 }
 \arguments{
@@ -69,9 +71,13 @@ The partitions are randomly defined when predict is set as a positive integer.}
 \item{ptest}{proportion of the sample size to be considered in the test set for the \code{RSS_pred} analysis (default = 0.25 = 25\\% of the sample size).
 If predict = 0, ptest is ignored.}
 
-\item{epsilon}{tolerance value to control the convergence criterion in the EM-algorithm (default = 10^(-5)).}
+\item{em_controls}{a list containing two elements: \code{maxit} that contains the maximum number of iterations of the EM algorithm, the default is set to 5000;
+\code{em_tol} that defines the tolerance value to control the convergence criterion in the EM-algorithm, the default is set to 10^(-5).}
 
 \item{optim_method}{main optimization algorithm to be used. The available methods are the same as those of \code{optim} function. The default is set to "L-BFGS-B".}
+
+\item{optim_controls}{a list of control arguments to be passed to the \code{optim} function in the optimization of the model. For the control options, see
+the 'Details' in the help of \code{\link[stats]{optim}} for the possible arguments.}
 
 \item{z}{vector of response variables with length \code{n}. Each coordinate must belong to the standard unit interval (0,1).}
 

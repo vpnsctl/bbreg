@@ -1,3 +1,7 @@
+# bbreg 2.0.5
+
+* Added optimization controls
+
 # bbreg 2.0.4
 
 * Created the function bbreg.fit

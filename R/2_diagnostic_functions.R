@@ -14,7 +14,7 @@
 #' Residuals vs. Index; Plot 2: Q-Q Plot (if the fit contains simulated envelopes,
 #' the plot will be with the simulated envelopes); Plot 3: Fitted means vs. Response;
 #' Plot 4: Residuals vs. Fitted means.
-#' @param ask logical; if \code{TRUE}, the user is aked before each plot.
+#' @param ask logical; if \code{TRUE}, the user is asked before each plot.
 #' @param main character; title to be placed at each plot additionally (and above) all captions.
 #' @param qqline logical; if \code{TRUE} and the fit does *not* contain simulated
 #' envelopes, a qqline will be added to the normal Q-Q plot.
@@ -299,40 +299,16 @@ print.bbreg <- function(x, ...) {
 #' }
 #' @export
 coef.bbreg <- function(object, parameters = c("all", "mean", "precision"), ...) {
-  fit <- object
-  nkap <- length(fit$kappa)
-  nlam <- length(fit$lambda)
-  #
-  itc <- fit$intercept
-  varnames <- NULL
-  if (itc[1] == TRUE) {
-    varnames <- "(intercept)"
-  }
-  varnames <- c(varnames, labels(stats::terms(stats::formula(fit$call, rhs = 1))))
-  if (itc[2] == TRUE) {
-    varnames <- c(varnames, "(intercept)")
-  }
-  varnames <- c(varnames, labels(stats::terms(stats::formula(fit$call, rhs = 2))))
-  #
-  if (length(varnames) < (nkap + nlam)) {
-    varnames <- names(fit$start)
-  }
-  #
-  coeff_kappa <- fit$kappa
-  names(coeff_kappa) <- varnames[1:nkap]
-  coeff_lambda <- fit$lambda
-  names(coeff_lambda) <- varnames[(nkap + 1):(nkap + nlam)]
-  all_coeff <- c(coeff_kappa, coeff_lambda)
-  if (length(parameters) > 1) {
-    parameters <- parameters[1]
+  if(length(parameters)>1){
+    parameters = parameters[1]
   }
   coef_ext <- switch(parameters,
                      "all" = {
-                       all_coeff
+                       object$coefficients
                      }, "mean" = {
-                       coeff_kappa
+                       object$coefficients$mean
                      }, "precision" = {
-                       coeff_lambda
+                       object$coefficients$precision
                      }
   )
   return(coef_ext)

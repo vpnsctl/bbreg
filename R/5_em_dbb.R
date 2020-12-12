@@ -6,12 +6,15 @@
 #' (i) the response with bounded continuous observations (0 < z_i < 1),
 #' (ii) covariates for the mean submodel (columns of matrix x) and
 #' (iii) covariates for the precision submodel (columns of matrix v).
-#' @param epsilon tolerance value to control the convergence criterion in the Expectation-Maximization algorithm (default = 10^(-5)).
 #' @param link.mean a string containing the link function for the mean.
 #' The possible link functions for the mean are "logit","probit", "cauchit", "cloglog".
 #' @param link.precision a string containing the link function the precision parameter.
 #' The possible link functions for the precision parameter are "identity", "log", "sqrt".
+#' @param em_controls a list containing two elements: \code{maxit} that contains the maximum number of iterations of the EM algorithm, the default is set to 5000; 
+#' \code{em_tol} that defines the tolerance value to control the convergence criterion in the EM-algorithm, the default is set to 10^(-5).
 #' @param optim_method main optimization algorithm to be used. The available methods are the same as those of \code{optim} function. The default is set to "L-BFGS-B".
+#' @param optim_controls a list of control arguments to be passed to the \code{optim} function in the optimization of the model. For the control options, see
+#' the 'Details' in the help of \code{\link[stats]{optim}} for the possible arguments.
 #' @return Object of class dbbtest, which is a list containing two elements. The 1st one is a table of terms
 #' considered in the decision rule of the test; they are sum(z2/n) = sum_{i=1}^{n}(z_i^2)/n, sum(quasi_mu) = sum_{i=1}^{n}(tilde{mu_i}^2 + tilde{mu_i}(1-tilde{mu_i})/2)
 #' |D_bessel| and |D_beta| as indicated in the main reference. The 2nd term of the list is the name of the selected model (bessel or beta).
@@ -24,7 +27,7 @@
 #'   link.mean = "logit", link.precision = "identity"
 #' )
 #' @export
-dbbtest <- function(formula, data, epsilon = 10^(-5), link.mean, link.precision, optim_method = "L-BFGS-B") {
+dbbtest <- function(formula, data, link.mean, link.precision, em_controls = list(maxit = 5000, em_tol = 10^(-5)), optim_method = "L-BFGS-B", optim_controls = list()) {
   link_mean <- stats::make.link(link.mean)
   link_precision <- stats::make.link(link.precision)
   ## Processing call
@@ -54,9 +57,9 @@ dbbtest <- function(formula, data, epsilon = 10^(-5), link.mean, link.precision,
   x <- stats::model.matrix(MTerms_x, MF)
   v <- stats::model.matrix(MTerms_v, MF)
   
-  out <- dbbtest.fit(z = z,x = x,v = v, epsilon = epsilon, 
+  out <- dbbtest.fit(z = z,x = x,v = v, 
                      link.mean = link.mean, 
-                     link.precision = link.precision, optim_method)
+                     link.precision = link.precision, em_controls = em_controls, optim_method = optim_method, optim_controls = optim_controls)
   return(out)
 }
 
@@ -67,12 +70,15 @@ dbbtest <- function(formula, data, epsilon = 10^(-5), link.mean, link.precision,
 #' @param z vector of response variables with length \code{n}. Each coordinate must belong to the standard unit interval (0,1). 
 #' @param x matrix of covariates with respect to the mean with dimension \code{(n,nkap)}.
 #' @param v matrix of covariates with respect to the precision parameter. The default is \code{NULL}. If not \code{NULL} must be of dimension \code{(n,nlam)}.
-#' @param epsilon tolerance value to control the convergence criterion in the Expectation-Maximization algorithm (default = 10^(-5)).
 #' @param link.mean a string containing the link function for the mean.
 #' The possible link functions for the mean are "logit","probit", "cauchit", "cloglog".
 #' @param link.precision a string containing the link function the precision parameter.
 #' The possible link functions for the precision parameter are "identity", "log", "sqrt".
+#' @param em_controls a list containing two elements: \code{maxit} that contains the maximum number of iterations of the EM algorithm, the default is set to 5000; 
+#' \code{em_tol} that defines the tolerance value to control the convergence criterion in the EM-algorithm, the default is set to 10^(-5).
 #' @param optim_method main optimization algorithm to be used. The available methods are the same as those of \code{optim} function. The default is set to "L-BFGS-B".
+#' @param optim_controls a list of control arguments to be passed to the \code{optim} function in the optimization of the model. For the control options, see
+#' the 'Details' in the help of \code{\link[stats]{optim}} for the possible arguments.
 #' @return Object of class dbbtest, which is a list containing two elements. The 1st one is a table of terms
 #' considered in the decision rule of the test; they are sum(z2/n) = sum_{i=1}^{n}(z_i^2)/n, sum(quasi_mu) = sum_{i=1}^{n}(tilde{mu_i}^2 + tilde{mu_i}(1-tilde{mu_i})/2)
 #' |D_bessel| and |D_beta| as indicated in the main reference. The 2nd term of the list is the name of the selected model (bessel or beta).
@@ -90,7 +96,7 @@ dbbtest <- function(formula, data, epsilon = 10^(-5), link.mean, link.precision,
 #' z <- unlist(z)
 #' dbbtest.fit(z = z, x = x ,v = v, link.mean = "logit", link.precision = "identity")
 #' @export
-dbbtest.fit <- function(z,x,v = NULL, epsilon = 10^(-5), link.mean, link.precision, optim_method = "L-BFGS-B") {
+dbbtest.fit <- function(z,x,v = NULL, link.mean, link.precision, em_controls = list(maxit = 5000, em_tol = 10^(-5)), optim_method = "L-BFGS-B", optim_controls = list()) {
   link_mean <- stats::make.link(link.mean)
   link_precision <- stats::make.link(link.precision)
   
@@ -135,7 +141,7 @@ dbbtest.fit <- function(z,x,v = NULL, epsilon = 10^(-5), link.mean, link.precisi
     lam <- startvalues(z, x, v, link.mean, link.precision, "bessel")
     lam <- lam[[2]]
     #
-    EM <- EMrun_bes_dbb(lam, z, v, mu = muquasi, epsilon, link.precision, optim_method)
+    EM <- EMrun_bes_dbb(lam, z, v, mu = muquasi, link.precision, em_controls, optim_method, optim_controls)
     phi <- link_precision$linkinv(v %*% EM)
     gphi <- (1 - phi + (phi^2) * exp(phi) * expint_En(phi, order = 1)) / 2
     Wbes <- gphi
@@ -143,7 +149,7 @@ dbbtest.fit <- function(z,x,v = NULL, epsilon = 10^(-5), link.mean, link.precisi
     lam <- startvalues(z, x, v, link.mean, link.precision, "beta")
     lam <- lam[[2]]
     #
-    EM <- EMrun_bet_dbb(lam, z, v, mu = muquasi, epsilon, link.precision, optim_method)
+    EM <- EMrun_bet_dbb(lam, z, v, mu = muquasi, link.precision, em_controls, optim_method, optim_controls)
     phi <- link_precision$linkinv(v %*% EM)
     gphi <- 1 / (1 + phi)
     Wbet <- gphi
@@ -268,15 +274,21 @@ gradlam_bet_dbb <- function(lam, phiold, z, v, mu, link.precision) {
 #' @param z response vector with 0 < z_i < 1.
 #' @param v matrix containing the covariates for the precision submodel. Each column is a different covariate.
 #' @param mu mean parameter (vector having the same size of z).
-#' @param epsilon tolerance to controll convergence criterion.
 #' @param link.precision a string containing the link function the precision parameter.
+#' @param em_controls a list containing two elements: \code{maxit} that contains the maximum number of iterations of the EM algorithm, the default is set to 5000; 
+#' \code{em_tol} that defines the tolerance value to control the convergence criterion in the EM-algorithm, the default is set to 10^(-5).
 #' @param optim_method main optimization algorithm to be used. The available methods are the same as those of \code{optim} function. The default is set to "L-BFGS-B".
-#' The possible link functions for the precision parameter are "identity", "log", "sqrt".
+#' @param optim_controls a list of control arguments to be passed to the \code{optim} function in the optimization of the model. For the control options, see
+#' the 'Details' in the help of \code{\link[stats]{optim}} for the possible arguments.
 #' @return Vector containing the estimates for lam in the bessel regression.
-EMrun_bes_dbb <- function(lam, z, v, mu, epsilon, link.precision, optim_method = "L-BFGS-B") {
+EMrun_bes_dbb <- function(lam, z, v, mu, link.precision, em_controls = list(maxit = 5000, em_tol = 10^(-5)), optim_method = "L-BFGS-B", optim_controls = list()) {
   link_precision <- stats::make.link(link.precision)
   phi <- link_precision$linkinv(v %*% lam) # phi precision parameter.
   count <- 0
+  
+  maxit <- em_controls$maxit
+  epsilon <- em_controls$em_tol
+  
   repeat{
     lam_r <- lam
     phi_r <- phi
@@ -285,7 +297,7 @@ EMrun_bes_dbb <- function(lam, z, v, mu, epsilon, link.precision, optim_method =
     ### M step ------------------------------
     M <- tryCatch(stats::optim(
       par = lam, fn = Qf_bes_dbb, gr = gradlam_bes_dbb, wz = wz_r, z = z, v = v,
-      mu = mu, link.precision = link.precision, control = list(fnscale = -1), method = optim_method
+      mu = mu, link.precision = link.precision, control = c(fnscale = -1, optim_controls), method = optim_method
     ), error = function(e) {
       "Error"
     })
@@ -294,7 +306,7 @@ EMrun_bes_dbb <- function(lam, z, v, mu, epsilon, link.precision, optim_method =
       warning("Trying with numerical derivatives")
       M <- tryCatch(stats::optim(
         par = lam, fn = Qf_bes_dbb, gr = NULL, wz = wz_r, z = z, v = v,
-        mu = mu, link.precision = link.precision, control = list(fnscale = -1), method = optim_method
+        mu = mu, link.precision = link.precision, control = c(fnscale = -1, optim_controls), method = optim_method
       ), error = function(e) {
         "Error"
       })
@@ -312,7 +324,7 @@ EMrun_bes_dbb <- function(lam, z, v, mu, epsilon, link.precision, optim_method =
 
       M <- tryCatch(stats::optim(
         par = lam, fn = Qf_bes_dbb, gr = NULL, wz = wz_r, z = z, v = v,
-        mu = mu, link.precision = link.precision, control = list(fnscale = -1), method = optim_temp
+        mu = mu, link.precision = link.precision, control = c(fnscale = -1, optim_controls), method = optim_temp
       ), error = function(e) {
         "Error"
       })
@@ -334,8 +346,9 @@ EMrun_bes_dbb <- function(lam, z, v, mu, epsilon, link.precision, optim_method =
     if (max(term1, term2) < epsilon) {
       break
     }
-    if (count >= 10000) {
-      epsilon <- 10^(-3)
+    if (count >= maxit) {
+      warning("The EM algorithm did not converge.")
+      break
     }
     ### -------------------------------------
   }
@@ -349,15 +362,22 @@ EMrun_bes_dbb <- function(lam, z, v, mu, epsilon, link.precision, optim_method =
 #' @param z response vector with 0 < z_i < 1.
 #' @param v matrix containing the covariates for the precision submodel. Each column is a different covariate.
 #' @param mu mean parameter (vector having the same size of z).
-#' @param epsilon tolerance to controll convergence criterion.
 #' @param link.precision a string containing the link function the precision parameter.
 #' The possible link functions for the precision parameter are "identity", "log", "sqrt".
+#' @param em_controls a list containing two elements: \code{maxit} that contains the maximum number of iterations of the EM algorithm, the default is set to 5000; 
+#' \code{em_tol} that defines the tolerance value to control the convergence criterion in the EM-algorithm, the default is set to 10^(-5).
 #' @param optim_method main optimization algorithm to be used. The available methods are the same as those of \code{optim} function. The default is set to "L-BFGS-B".
+#' @param optim_controls a list of control arguments to be passed to the \code{optim} function in the optimization of the model. For the control options, see
+#' the 'Details' in the help of \code{\link[stats]{optim}} for the possible arguments.
 #' @return Vector containing the estimates for lam in the beta regression.
-EMrun_bet_dbb <- function(lam, z, v, mu, epsilon, link.precision, optim_method = "L-BFGS-B") {
+EMrun_bet_dbb <- function(lam, z, v, mu, link.precision, em_controls = list(maxit = 5000, em_tol = 10^(-5)), optim_method = "L-BFGS-B", optim_controls = list()) {
   link_precision <- stats::make.link(link.precision)
   phi <- link_precision$linkinv(v %*% lam) # phi precision parameter.
   count <- 0
+  
+  maxit <- em_controls$maxit
+  epsilon <- em_controls$em_tol
+
   repeat{
     lam_r <- lam
     phi_r <- phi
@@ -365,7 +385,7 @@ EMrun_bet_dbb <- function(lam, z, v, mu, epsilon, link.precision, optim_method =
     ### M step ------------------------------
     M <- tryCatch(stats::optim(
       par = lam, fn = Qf_bet_dbb, gr = gradlam_bet_dbb, phiold = phi_r, z = z, v = v, mu = mu,
-      link.precision = link.precision, control = list(fnscale = -1), method = optim_method
+      link.precision = link.precision, control = c(fnscale = -1, optim_controls), method = optim_method
     ), error = function(e) {
       "Error"
     })
@@ -374,7 +394,7 @@ EMrun_bet_dbb <- function(lam, z, v, mu, epsilon, link.precision, optim_method =
       warning("Trying with numerical derivatives")
       M <- tryCatch(stats::optim(
         par = lam, fn = Qf_bet_dbb, gr = NULL, phiold = phi_r, z = z, v = v, mu = mu,
-        link.precision = link.precision, control = list(fnscale = -1), method = optim_method
+        link.precision = link.precision, control = c(fnscale = -1, optim_controls), method = optim_method
       ), error = function(e) {
         "Error"
       })
@@ -391,7 +411,7 @@ EMrun_bet_dbb <- function(lam, z, v, mu, epsilon, link.precision, optim_method =
       }
       M <- tryCatch(stats::optim(
         par = lam, fn = Qf_bet_dbb, gr = NULL, phiold = phi_r, z = z, v = v, mu = mu,
-        link.precision = link.precision, control = list(fnscale = -1), method = optim_temp
+        link.precision = link.precision, control = c(fnscale = -1, optim_controls), method = optim_temp
       ), error = function(e) {
         "Error"
       })
@@ -413,8 +433,9 @@ EMrun_bet_dbb <- function(lam, z, v, mu, epsilon, link.precision, optim_method =
     if (max(term1, term2) < epsilon) {
       break
     }
-    if (count >= 10000) {
-      epsilon <- 10^(-3)
+    if (count >= maxit) {
+      warning("The EM algorithm did not converge.")
+      break
     }
     ### -------------------------------------
   }

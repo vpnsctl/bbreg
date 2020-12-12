@@ -13,9 +13,11 @@ pred_accuracy_bet(
   v,
   ntest,
   predict,
-  epsilon,
   link.mean,
-  link.precision
+  link.precision,
+  em_controls,
+  optim_method,
+  optim_controls
 )
 }
 \arguments{
@@ -35,13 +37,18 @@ pred_accuracy_bet(
 
 \item{predict}{number of partitions (training and test sets) to be evaluated.}
 
-\item{epsilon}{tolerance parameter used in the Expectation-Maximization algorithm for the training data set.}
-
 \item{link.mean}{a string containing the link function for the mean.
 The possible link functions for the mean are "logit","probit", "cauchit", "cloglog".}
 
 \item{link.precision}{a string containing the link function the precision parameter.
 The possible link functions for the precision parameter are "identity", "log", "sqrt".}
+
+\item{em_controls}{a list containing two elements: \code{maxit} that contains the maximum number of iterations of the EM algorithm;
+\code{em_tol} that defines the tolerance value to control the convergence criterion in the EM-algorithm.}
+
+\item{optim_method}{main optimization algorithm to be used. The available methods are the same as those of \code{optim} function.}
+
+\item{optim_controls}{a list of control arguments to be passed to the \code{optim} function in the optimization of the model. For the control options, see}
 }
 \value{
 Vector containing the RSS for each partition of the full data set.
