@@ -22,8 +22,8 @@ bbreg(
 )
 
 bbreg.fit(
-  z,
   x,
+  z,
   v = NULL,
   link.mean = c("logit", "probit", "cauchit", "cloglog"),
   link.precision = c("identity", "log", "sqrt"),
@@ -79,9 +79,9 @@ If predict = 0, ptest is ignored.}
 \item{optim_controls}{a list of control arguments to be passed to the \code{optim} function in the optimization of the model. For the control options, see
 the 'Details' in the help of \code{\link[stats]{optim}} for the possible arguments.}
 
-\item{z}{vector of response variables with length \code{n}. Each coordinate must belong to the standard unit interval (0,1).}
-
 \item{x}{matrix of covariates with respect to the mean with dimension \code{(n,nkap)}.}
+
+\item{z}{vector of response variables with length \code{n}. Each coordinate must belong to the standard unit interval (0,1).}
 
 \item{v}{matrix of covariates with respect to the precision parameter. The default is \code{NULL}. If not \code{NULL} must be of dimension \code{(n,nlam)}.}
 }
