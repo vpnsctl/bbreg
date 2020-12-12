@@ -104,6 +104,7 @@ The objects of classes \code{bbreg} and \code{bbreg_fit} return lists containing
 \item \code{lambda} - vector containing the estimates of the precision-related coefficients;
 \item \code{mu} - estimated means;
 \item \code{fitted.values} - the fitted values in the response scale;
+\item \code{efron.pseudo.r2} - Efron's pseudo R^2: the squared correlation between the response variables and the predicted values;
 \item \code{x} - the covariates related to the mean;
 \item \code{v} - the covariates related to the precision parameter;
 \item \code{z} - the response variables;
@@ -140,10 +141,10 @@ The terms "x_i^T" and "v_i^T" represent, respectively, the i-th row of the matri
 
 This package implements an Expectation Maximization (EM) algorithm to fit the bessel regression. The full EM approach proposed in \emph{Barreto-Souza and Simas (2017)} for the beta
 regression is also available here. Fitting the beta regression via EM-algorithm is a major difference between the present package \pkg{bbreg} and the
-well known \code{betareg} created by Alexandre B. Simas and currently maintained by Achim Zeileis. The estimation procedure on the betareg packages
+well known \code{betareg} created by Alexandre B. Simas and currently maintained by Achim Zeileis. The estimation procedure on the \code{betareg} packages
 is given by maximizing the beta model likelihood via \code{\link[stats]{optim}}.
 In terms of initial values, \pkg{bbreg} uses quasi-likelihood estimates as the starting points for
-the EM-algorithms. The formulation of the target model also has the same structure as in the standard functions \code{lm}, \code{glm} and \pkg{betareg},
+the EM-algorithms. The formulation of the target model also has the same structure as in the standard functions \code{lm}, \code{glm} and \code{betareg},
 with also the same structure as the latter when precision covariates are being used. The user is supposed to
 write a formula object describing elements of the regression (response, covariates for the mean submodel,
 covariates for the precision submodel, presence of intercepts, and interactions). As an example, the description

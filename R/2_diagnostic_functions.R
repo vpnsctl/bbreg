@@ -41,6 +41,9 @@ plot.bbreg <- function(x, which = c(1, 2, 3, 4), ask = TRUE, main = "", qqline =
   if (length(which) == 1) {
     ask <- FALSE
   }
+  
+  current_ask = grDevices::devAskNewPage()
+  
   grDevices::devAskNewPage(ask = ask)
   res <- x$residuals
   call_mod <- deparse(x$call)
@@ -113,6 +116,8 @@ plot.bbreg <- function(x, which = c(1, 2, 3, 4), ask = TRUE, main = "", qqline =
     graphics::abline(0, 0, lty = 3)
     graphics::mtext(title_4, side = 3)
   }
+  
+  grDevices::devAskNewPage(ask = current_ask)
 }
 
 
@@ -403,26 +408,26 @@ summary.bbreg <- function(object, ...) {
   message(sprintf("%s\n", paste0("Number of iterations of the EM algorithm = ", M$niter)))
   #
   if (is.null(M$DBB) == FALSE) {
-    cat(sprintf("\n %s:\n", "Results of the discrimination test DBB"))
+    cat(sprintf("\n%s:\n", "Results of the discrimination test DBB"))
     print(structure(round(M$DBB, digits = digits)))
   }
   #
   residualname <- paste0(toupper(substring(M$residualname, 1, 1)), substring(M$residualname, 2))
-  cat(sprintf("\n %s:\n", paste0(residualname, " residuals")))
+  cat(sprintf("\n%s:\n", paste0(residualname, " residuals")))
   print(structure(round(c(M$RSS, as.vector(stats::quantile(M$residuals))), digits = digits), .Names = c("RSS", "Min", "1Q", "Median", "3Q", "Max")))
   #
   if (NROW(tab$mean)) {
-    cat(paste0("\n Coefficients modeling the mean (with ", M$link.mean, " link):\n"))
+    cat(paste0("\nCoefficients modeling the mean (with ", M$link.mean, " link):\n"))
     stats::printCoefmat(tab$mean, digits = digits, signif.legend = FALSE)
   } else {
-    message("\n No coefficients modeling the mean. \n")
+    message("\nNo coefficients modeling the mean. \n")
   }
   #
   if (NROW(tab$precision)) {
-    cat(paste0("\n Coefficients modeling the precision (with ", M$link.precision, " link):\n"))
+    cat(paste0("\nCoefficients modeling the precision (with ", M$link.precision, " link):\n"))
     stats::printCoefmat(tab$precision, digits = digits, signif.legend = FALSE)
   } else {
-    message("\n No coefficients modeling the precision. \n")
+    message("\nNo coefficients modeling the precision. \n")
   }
   #
   gp <- unique(M$gphi)
@@ -431,9 +436,11 @@ summary.bbreg <- function(object, ...) {
   }
   #
   if (getOption("show.signif.stars")) {
-    cat("---\n Signif. codes: ", "0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1", "\n\n")
+    cat("---\nSignif. codes: ", "0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1", "\n\n")
   }
   #
+  cat("Efron's pseudo R-squared: ", object$efron.pseudo.r2,"\n")
+  
   if (is.null(M$RSS_pred) == FALSE) {
     message(sprintf("%s\n", paste0("Average RSS from the predictive accuracy simulation = ", round(mean(M$RSS_pred), digits = digits))))
   }
