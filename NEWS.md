@@ -20,3 +20,22 @@
 * Added 'start', 'fitted.values' and 'coefficients' to the returned list by the bbreg function. Also named the vectors and matrices (rows and columns) accordingly.
 * Created pbessel, qbessel and rbessel functions. Also adjusted dbessel function to accept vectors as input.
 
+# bbreg 2.0.2 
+
+* Some minor bugs were fixed.
+
+# bbreg 2.0.1
+
+* Correction on the database SA.
+* Adjust on plot method to allow general graphical arguments.
+
+# bbreg 2.0.0
+
+* Several 'for' loops were rewritten in vectorized form.
+* Several S3 methods implemented.
+* functions 'bbsummary' and 'eplot' deprecated.
+* vignette written.
+* github repository created.
+* several improvements on the outputs.
+* initial guesses modified.
+
