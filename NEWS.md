@@ -33,6 +33,7 @@
 
 * Several 'for' loops were rewritten in vectorized form.
 * Several S3 methods implemented.
+* Different link functions for the mean and precision parameters added.
 * Functions 'bbsummary' and 'eplot' deprecated.
 * Vignette written.
 * Github repository created.
