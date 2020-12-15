@@ -9,9 +9,10 @@ EMrun_bet_dbb(
   z,
   v,
   mu,
-  epsilon,
   link.precision,
-  optim_method = "L-BFGS-B"
+  em_controls = list(maxit = 5000, em_tol = 10^(-5)),
+  optim_method = "L-BFGS-B",
+  optim_controls = list()
 )
 }
 \arguments{
@@ -23,12 +24,16 @@ EMrun_bet_dbb(
 
 \item{mu}{mean parameter (vector having the same size of z).}
 
-\item{epsilon}{tolerance to controll convergence criterion.}
-
 \item{link.precision}{a string containing the link function the precision parameter.
 The possible link functions for the precision parameter are "identity", "log", "sqrt".}
 
+\item{em_controls}{a list containing two elements: \code{maxit} that contains the maximum number of iterations of the EM algorithm, the default is set to 5000;
+\code{em_tol} that defines the tolerance value to control the convergence criterion in the EM-algorithm, the default is set to 10^(-5).}
+
 \item{optim_method}{main optimization algorithm to be used. The available methods are the same as those of \code{optim} function. The default is set to "L-BFGS-B".}
+
+\item{optim_controls}{a list of control arguments to be passed to the \code{optim} function in the optimization of the model. For the control options, see
+the 'Details' in the help of \code{\link[stats]{optim}} for the possible arguments.}
 }
 \value{
 Vector containing the estimates for lam in the beta regression.

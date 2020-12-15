@@ -1,3 +1,9 @@
+# bbreg 2.0.5
+
+* Added optimization controls
+* Added Efron's pseudo R2 on summary and as an element of the returned list of bbreg
+* Minor general fixes.
+
 # bbreg 2.0.4
 
 * Created the function bbreg.fit

@@ -15,7 +15,7 @@ Residuals vs. Index; Plot 2: Q-Q Plot (if the fit contains simulated envelopes,
 the plot will be with the simulated envelopes); Plot 3: Fitted means vs. Response;
 Plot 4: Residuals vs. Fitted means.}
 
-\item{ask}{logical; if \code{TRUE}, the user is aked before each plot.}
+\item{ask}{logical; if \code{TRUE}, the user is asked before each plot.}
 
 \item{main}{character; title to be placed at each plot additionally (and above) all captions.}
 

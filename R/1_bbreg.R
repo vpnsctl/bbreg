@@ -23,13 +23,16 @@
 #' The partitions are randomly defined when predict is set as a positive integer.
 #' @param ptest proportion of the sample size to be considered in the test set for the \code{RSS_pred} analysis (default = 0.25 = 25\% of the sample size).
 #' If predict = 0, ptest is ignored.
-#' @param epsilon tolerance value to control the convergence criterion in the EM-algorithm (default = 10^(-5)).
 #' @param link.mean optionally, a string containing the link function for the mean. If omitted, the 'logit' link function will be used.
 #' The possible link functions for the mean are "logit","probit", "cauchit", "cloglog".
 #' @param link.precision optionally, a string containing the link function the precision parameter. If omitted and the only precision
 #' covariate is the intercept, the 'identity' link function will be used, if omitted and there is a precision covariate other than the
 #' intercept, the 'log' link function will be used. The possible link functions for the precision parameter are "identity", "log", "sqrt".
+#' @param em_controls a list containing two elements: \code{maxit} that contains the maximum number of iterations of the EM algorithm, the default is set to 5000; 
+#' \code{em_tol} that defines the tolerance value to control the convergence criterion in the EM-algorithm, the default is set to 10^(-5).
 #' @param optim_method main optimization algorithm to be used. The available methods are the same as those of \code{optim} function. The default is set to "L-BFGS-B".
+#' @param optim_controls a list of control arguments to be passed to the \code{optim} function in the optimization of the model. For the control options, see
+#' the 'Details' in the help of \code{\link[stats]{optim}} for the possible arguments.
 #' @return \code{bbreg} returns an object of class "bbreg". The function \code{bbreg.fit} returns an object of class "bbreg_fit".
 #' The objects of classes \code{bbreg} and \code{bbreg_fit} return lists containing:
 #' 
@@ -48,6 +51,7 @@
 #'   \item \code{lambda} - vector containing the estimates of the precision-related coefficients;
 #'   \item \code{mu} - estimated means;
 #'   \item \code{fitted.values} - the fitted values in the response scale;
+#'   \item \code{efron.pseudo.r2} - Efron's pseudo R^2: the squared correlation between the response variables and the predicted values;
 #'   \item \code{x} - the covariates related to the mean;
 #'   \item \code{v} - the covariates related to the precision parameter;
 #'   \item \code{z} - the response variables;
@@ -81,10 +85,10 @@
 #'
 #' This package implements an Expectation Maximization (EM) algorithm to fit the bessel regression. The full EM approach proposed in \emph{Barreto-Souza and Simas (2017)} for the beta
 #' regression is also available here. Fitting the beta regression via EM-algorithm is a major difference between the present package \pkg{bbreg} and the
-#' well known \code{betareg} created by Alexandre B. Simas and currently maintained by Achim Zeileis. The estimation procedure on the betareg packages
+#' well known \code{betareg} created by Alexandre B. Simas and currently maintained by Achim Zeileis. The estimation procedure on the \code{betareg} packages
 #' is given by maximizing the beta model likelihood via \code{\link[stats]{optim}}.
 #' In terms of initial values, \pkg{bbreg} uses quasi-likelihood estimates as the starting points for
-#' the EM-algorithms. The formulation of the target model also has the same structure as in the standard functions \code{lm}, \code{glm} and \pkg{betareg},
+#' the EM-algorithms. The formulation of the target model also has the same structure as in the standard functions \code{lm}, \code{glm} and \code{betareg},
 #' with also the same structure as the latter when precision covariates are being used. The user is supposed to
 #' write a formula object describing elements of the regression (response, covariates for the mean submodel,
 #' covariates for the precision submodel, presence of intercepts, and interactions). As an example, the description
@@ -167,10 +171,20 @@
 bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cloglog"),
                   link.precision = c("identity", "log", "sqrt"),
                   model = NULL, residual = NULL, envelope = 0, prob = 0.95, predict = 0, 
-                  ptest = 0.25, epsilon = 10^(-5),
-                  optim_method = "L-BFGS-B") {
+                  ptest = 0.25, em_controls = list(maxit = 5000, em_tol = 10^(-5)),
+                  optim_method = "L-BFGS-B", optim_controls = list()) {
   ## Processing call
   # If data is not provided, verify the current R workspace
+  
+  #Processing em_controls:
+  if(is.null(em_controls$maxit)){
+    em_controls$maxit = 5000
+  }
+  
+  if(is.null(em_controls$em_tol)){
+    em_controls$em_tol = 10^(-5)
+  }
+  
   if (missing(data)) {
     data <- environment(formula)
   }
@@ -203,9 +217,9 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
   v <- stats::model.matrix(MTerms_v, MF)
   
   
-  object <- bbreg.fit(z=z,x=x,v=v,link.mean = link.mean, link.precision = link.precision,
+  object <- bbreg.fit(x=x,z=z,v=v,link.mean = link.mean, link.precision = link.precision,
                       model = model, residual = residual, envelope = envelope, prob = prob,
-                      predict = predict, ptest = ptest, epsilon = epsilon)
+                      predict = predict, ptest = ptest, em_controls = em_controls, optim_method = optim_method, optim_controls = optim_controls)
   
   object$call <- Fo
   object$terms <- list(mean = MTerms_x, precision = MTerms_v)
@@ -222,10 +236,21 @@ bbreg <- function(formula, data, link.mean = c("logit", "probit", "cauchit", "cl
 #' @rdname bbreg
 #' @export
 
-bbreg.fit <- function(z, x, v = NULL, link.mean = c("logit", "probit", "cauchit", "cloglog"),
+bbreg.fit <- function(x, z, v = NULL, link.mean = c("logit", "probit", "cauchit", "cloglog"),
                       link.precision = c("identity", "log", "sqrt"),
                       model = NULL, residual = NULL, envelope = 0, prob = 0.95, predict = 0, 
-                      ptest = 0.25, epsilon = 10^(-5), optim_method = "L-BFGS-B") {
+                      ptest = 0.25, em_controls = list(maxit = 5000, em_tol = 10^(-5)), optim_method = "L-BFGS-B", optim_controls = list()) {
+  
+  #Processing em_controls:
+  if(is.null(em_controls$maxit)){
+    em_controls$maxit = 5000
+  }
+  
+  if(is.null(em_controls$em_tol)){
+    em_controls$em_tol = 10^(-5)
+  }
+  
+  
   n <- length(z)
   x = as.matrix(x)
   if(is.null(v)){
@@ -302,10 +327,7 @@ bbreg.fit <- function(z, x, v = NULL, link.mean = c("logit", "probit", "cauchit"
     warning(paste0("ptest = ", ptest, " is ignored since predict = 0"))
   }
   #
-  if (epsilon < 0) {
-    stop("consider epsilon > 0")
-  }
-  
+
   ## Set ntest (size of the test set) when "prediction > 0"
   if (predict > 0) {
     ntest <- round(ptest * n)
@@ -354,7 +376,7 @@ bbreg.fit <- function(z, x, v = NULL, link.mean = c("logit", "probit", "cauchit"
       modelname <- "Bessel regression"
       message <- paste0(modelname, " via EM - Ignoring the Discrimination test (DBB)")
       inits <- list(kap, lam)
-      EM <- EMrun_bes(kap, lam, z, x, v, epsilon, link.mean, link.precision, optim_method)
+      EM <- EMrun_bes(kap, lam, z, x, v, link.mean, link.precision, em_controls, optim_method, optim_controls)
       
       niter <- EM[[3]] # number of iterations of the EM algorithm
       Est <- EM[[1]] # coefficients
@@ -376,13 +398,13 @@ bbreg.fit <- function(z, x, v = NULL, link.mean = c("logit", "probit", "cauchit"
       DBB <- NULL
       Env <- NULL
       if (envelope > 0) {
-        Env <- envelope_bes(residual, Est[1:nkap], Est[-(1:nkap)], x, v, envelope, prob, n, epsilon, link.mean, link.precision)
+        Env <- envelope_bes(residual, Est[1:nkap], Est[-(1:nkap)], x, v, envelope, prob, n, link.mean, link.precision, em_controls, optim_method, optim_controls)
         # % of residuals inside the envelope
         Env_prop <- 100 * sum(sort(res) < Env[1, ] & sort(res) > Env[3, ]) / n
       }
       RSS_pred <- NULL
       if (predict > 0) {
-        RSS_pred <- pred_accuracy_bes(residual, kap, lam, z, x, v, ntest, predict, epsilon, link.mean, link.precision)
+        RSS_pred <- pred_accuracy_bes(residual, kap, lam, z, x, v, ntest, predict, link.mean, link.precision, em_controls, optim_method, optim_controls)
       }
       rm("EM", "Est")
     }
@@ -396,7 +418,7 @@ bbreg.fit <- function(z, x, v = NULL, link.mean = c("logit", "probit", "cauchit"
       
       modelname <- "Beta regression"
       message <- paste0(modelname, " via EM - Ignoring the Discrimination test (DBB)")
-      EM <- EMrun_bet(kap, lam, z, x, v, epsilon, link.mean, link.precision, optim_method)
+      EM <- EMrun_bet(kap, lam, z, x, v, link.mean, link.precision, em_controls, optim_method, optim_controls)
       niter <- EM[[3]] # number of iterations of the EM algorithm
       Est <- EM[[1]] # coefficients
       kap <- Est[1:nkap]
@@ -417,20 +439,20 @@ bbreg.fit <- function(z, x, v = NULL, link.mean = c("logit", "probit", "cauchit"
       DBB <- NULL
       Env <- NULL
       if (envelope > 0) {
-        Env <- envelope_bet(residual, kap, lam, x, v, envelope, prob, n, epsilon, link.mean, link.precision)
+        Env <- envelope_bet(residual, kap, lam, x, v, envelope, prob, n, link.mean, link.precision, em_controls, optim_method, optim_controls)
         # % of residuals inside the envelope
         Env_prop <- 100 * sum(sort(res) < Env[1, ] & sort(res) > Env[3, ]) / n
       }
       RSS_pred <- NULL
       if (predict > 0) {
-        RSS_pred <- pred_accuracy_bet(residual, kap, lam, z, x, v, ntest, predict, epsilon, link.mean, link.precision)
+        RSS_pred <- pred_accuracy_bet(residual, kap, lam, z, x, v, ntest, predict, link.mean, link.precision, em_controls, optim_method, optim_controls)
       }
       rm("EM", "Est")
     }
   }
   if (is.null(model)) {
     # run the discrimination
-    aux <- dbbtest.fit(z, x, v, epsilon, link.mean, link.precision, optim_method)
+    aux <- dbbtest.fit(z, x, v, link.mean, link.precision, em_controls, optim_method, optim_controls)
     # fit the chosen model
     if (aux[[2]] == "bessel") {
       start <- startvalues(z, x, v, link.mean, link.precision, "bessel")
@@ -442,7 +464,7 @@ bbreg.fit <- function(z, x, v = NULL, link.mean = c("logit", "probit", "cauchit"
       
       modelname <- "Bessel regression"
       message <- paste0(modelname, " via EM - Model selected via Discrimination test (DBB)")
-      EM <- EMrun_bes(kap, lam, z, x, v, epsilon, link.mean, link.precision, optim_method)
+      EM <- EMrun_bes(kap, lam, z, x, v, link.mean, link.precision, em_controls, optim_method, optim_controls)
       niter <- EM[[3]] # number of iterations of the EM algorithm
       Est <- EM[[1]] # coefficients
       kap <- Est[1:nkap]
@@ -463,13 +485,13 @@ bbreg.fit <- function(z, x, v = NULL, link.mean = c("logit", "probit", "cauchit"
       DBB <- aux[[1]]
       Env <- NULL
       if (envelope > 0) {
-        Env <- envelope_bes(residual, kap, lam, x, v, envelope, prob, n, epsilon, link.mean, link.precision)
+        Env <- envelope_bes(residual, kap, lam, x, v, envelope, prob, n, link.mean, link.precision, em_controls, optim_method, optim_controls)
         # % of residuals inside the envelope
         Env_prop <- 100 * sum(sort(res) < Env[1, ] & sort(res) > Env[3, ]) / n
       }
       RSS_pred <- NULL
       if (predict > 0) {
-        RSS_pred <- pred_accuracy_bes(residual, kap, lam, z, x, v, ntest, predict, epsilon, link.mean, link.precision)
+        RSS_pred <- pred_accuracy_bes(residual, kap, lam, z, x, v, ntest, predict, link.mean, link.precision, em_controls, optim_method, optim_controls)
       }
       rm("EM", "Est")
     }
@@ -483,7 +505,7 @@ bbreg.fit <- function(z, x, v = NULL, link.mean = c("logit", "probit", "cauchit"
       
       modelname <- "Beta regression"
       message <- paste0(modelname, " via EM - Model selected via Discrimination test (DBB)")
-      EM <- EMrun_bet(kap, lam, z, x, v, epsilon, link.mean, link.precision, optim_method)
+      EM <- EMrun_bet(kap, lam, z, x, v, link.mean, link.precision, em_controls, optim_method, optim_controls)
       niter <- EM[[3]] # number of iterations of the EM algorithm
       Est <- EM[[1]] # coefficients
       kap <- Est[1:nkap]
@@ -504,17 +526,20 @@ bbreg.fit <- function(z, x, v = NULL, link.mean = c("logit", "probit", "cauchit"
       DBB <- aux[[1]]
       Env <- NULL
       if (envelope > 0) {
-        Env <- envelope_bet(residual, kap, lam, x, v, envelope, prob, n, epsilon, link.mean, link.precision)
+        Env <- envelope_bet(residual, kap, lam, x, v, envelope, prob, n, link.mean, link.precision, em_controls, optim_method, optim_controls)
         # % of residuals inside the envelope
         Env_prop <- 100 * sum(sort(res) < Env[1, ] & sort(res) > Env[3, ]) / n
       }
       RSS_pred <- NULL
       if (predict > 0) {
-        RSS_pred <- pred_accuracy_bet(residual, kap, lam, z, x, v, ntest, predict, epsilon, link.mean, link.precision)
+        RSS_pred <- pred_accuracy_bet(residual, kap, lam, z, x, v, ntest, predict, link.mean, link.precision, em_controls, optim_method, optim_controls)
       }
       rm("EM", "Est")
     }
   }
+  
+  #Efron pseudo R^2: the squared linear correlation between the response variable and the estimated mean
+  efron.pseudo.r2 <- stats::cor(z, mu)^2
   
   #Naming variables accordingly
   names(kap) <- colnames(x)
@@ -536,7 +561,9 @@ bbreg.fit <- function(z, x, v = NULL, link.mean = c("logit", "probit", "cauchit"
   object$kappa <- kap
   object$lambda <- lam
   object$mu <- mu
+  object$efron.pseudo.r2 <- efron.pseudo.r2
   object$fitted.values <- mu
+  object$efron.pseudo.r2 <- efron.pseudo.r2
   object$coefficients <- list(mean = kap, precision = lam)
   object$start <- start
   object$x <- x

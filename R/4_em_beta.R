@@ -214,14 +214,17 @@ gradtheta_bet <- function(theta, phiold, z, x, v, link.mean, link.precision) {
 #' @param z response vector with 0 < z_i < 1.
 #' @param x matrix containing the covariates for the mean submodel. Each column is a different covariate.
 #' @param v matrix containing the covariates for the precision submodel. Each column is a different covariate.
-#' @param epsilon tolerance to control the convergence criterion.
 #' @param link.mean a string containing the link function for the mean.
 #' The possible link functions for the mean are "logit","probit", "cauchit", "cloglog".
 #' @param link.precision a string containing the link function the precision parameter.
 #' The possible link functions for the precision parameter are "identity", "log", "sqrt".
+#' @param em_controls a list containing two elements: \code{maxit} that contains the maximum number of iterations of the EM algorithm, the default is set to 5000; 
+#' \code{em_tol} that defines the tolerance value to control the convergence criterion in the EM-algorithm, the default is set to 10^(-5).
 #' @param optim_method main optimization algorithm to be used. The available methods are the same as those of \code{optim} function. The default is set to "L-BFGS-B".
+#' @param optim_controls a list of control arguments to be passed to the \code{optim} function in the optimization of the model. For the control options, see
+#' the 'Details' in the help of \code{\link[stats]{optim}} for the possible arguments.
 #' @return Vector containing the estimates for kappa and lambda in the beta regression.
-EMrun_bet <- function(kap, lam, z, x, v, epsilon, link.mean, link.precision, optim_method = "L-BFGS-B") {
+EMrun_bet <- function(kap, lam, z, x, v, link.mean, link.precision, em_controls = list(maxit = 5000, em_tol = 10^(-5)), optim_method = "L-BFGS-B", optim_controls = list()) {
   n <- length(z)
   nkap <- ncol(x)
   nlam <- ncol(v)
@@ -231,6 +234,9 @@ EMrun_bet <- function(kap, lam, z, x, v, epsilon, link.mean, link.precision, opt
   phi <- link_precision$linkinv(v %*% lam) # phi precision parameter.
   theta <- c(kap, lam)
   count <- 0
+  
+  maxit <- em_controls$maxit
+  epsilon <- em_controls$em_tol
   
   repeat{
     theta_r <- theta
@@ -251,7 +257,7 @@ EMrun_bet <- function(kap, lam, z, x, v, epsilon, link.mean, link.precision, opt
       v = v,
       link.mean = link.mean,
       link.precision = link.precision,
-      control = list(fnscale = -1),
+      control = c(fnscale = -1, optim_controls),
       method = optim_method
     ), error = function(e) {
       "Error"
@@ -269,7 +275,7 @@ EMrun_bet <- function(kap, lam, z, x, v, epsilon, link.mean, link.precision, opt
         v = v,
         link.mean = link.mean,
         link.precision = link.precision,
-        control = list(fnscale = -1),
+        control = c(fnscale = -1, optim_controls),
         method = optim_method
       ), error = function(e) {
         "Error"
@@ -295,7 +301,7 @@ EMrun_bet <- function(kap, lam, z, x, v, epsilon, link.mean, link.precision, opt
         v = v,
         link.mean = link.mean,
         link.precision = link.precision,
-        control = list(fnscale = -1),
+        control = c(fnscale = -1, optim_controls),
         method = optim_temp
       ), error = function(e) {
         "Error"
@@ -318,8 +324,9 @@ EMrun_bet <- function(kap, lam, z, x, v, epsilon, link.mean, link.precision, opt
     if (max(term1, term2) < epsilon) {
       break
     }
-    if (count >= 10000) {
-      epsilon <- 10^(-3)
+    if (count >= maxit) {
+      warning("The EM algorithm did not converge.")
+      break
     }
     ### -------------------------------------
   }
@@ -424,20 +431,24 @@ simdata_bet <- function(kap, lam, x, v, repetitions = 1, link.mean, link.precisi
 #' @param nsim_env number of synthetic data sets to be generated.
 #' @param n sample size.
 #' @param prob confidence level of the envelope (number between 0 and 1).
-#' @param epsilon tolerance parameter used in the Expectation-Maximization algorithm applied to the synthetic data.
 #' @param link.mean a string containing the link function for the mean.
 #' The possible link functions for the mean are "logit","probit", "cauchit", "cloglog".
 #' @param link.precision a string containing the link function the precision parameter.
 #' The possible link functions for the precision parameter are "identity", "log", "sqrt".
+#' @param em_controls a list containing two elements: \code{maxit} that contains the maximum number of iterations of the EM algorithm; 
+#' \code{em_tol} that defines the tolerance value to control the convergence criterion in the EM-algorithm.
+#' @param optim_method main optimization algorithm to be used. The available methods are the same as those of \code{optim} function.
+#' @param optim_controls a list of control arguments to be passed to the \code{optim} function in the optimization of the model. For the control options, see
+#' the 'Details' in the help of \code{\link[stats]{optim}} for the possible arguments.
+#' @return Matrix with dimension 2 x n (1st row = upper bound, second row = lower bound).
 #' @seealso
 #' \code{\link{score_residual_bet}}, \code{\link{quantile_residual_bet}}, \code{\link{pred_accuracy_bet}}
-#' @return Matrix with dimension 2 x n (1st row = upper bound, second row = lower bound).
-envelope_bet <- function(residual, kap, lam, x, v, nsim_env, prob, n, epsilon, link.mean, link.precision) {
+envelope_bet <- function(residual, kap, lam, x, v, nsim_env, prob, n, link.mean, link.precision, em_controls, optim_method, optim_controls) {
   zsim <- simdata_bet(kap, lam, x, v, nsim_env, link.mean, link.precision)
   Res <- switch(residual,
                 pearson = {
                   Res <- pblapply(zsim, function(zs) {
-                    est <- EMrun_bet(kap, lam, z = zs, x, v, epsilon, link.mean, link.precision)$mu_gphi
+                    est <- EMrun_bet(kap, lam, z = zs, x, v, link.mean, link.precision, em_controls, optim_method, optim_controls)$mu_gphi
                     musim <- est[, 1]
                     gpsim <- est[, 2]
                     (zs - musim) / (sqrt(gpsim * musim * (1 - musim)))
@@ -447,7 +458,7 @@ envelope_bet <- function(residual, kap, lam, x, v, nsim_env, prob, n, epsilon, l
                 score = {
                   nkap <- length(kap)
                   Res <- pblapply(zsim, function(zs) {
-                    est <- EMrun_bet(kap, lam, z = zs, x, v, epsilon, link.mean, link.precision)$coeff
+                    est <- EMrun_bet(kap, lam, z = zs, x, v, link.mean, link.precision, em_controls, optim_method, optim_controls)$coeff
                     kapsim <- est[1:nkap]
                     lamsim <- est[-(1:nkap)]
                     score_residual_bet(kapsim, lamsim, zs, x, v, link.mean, link.precision)
@@ -457,7 +468,7 @@ envelope_bet <- function(residual, kap, lam, x, v, nsim_env, prob, n, epsilon, l
                 quantile = {
                   nkap <- length(kap)
                   Res <- pblapply(zsim, function(zs) {
-                    est <- EMrun_bet(kap, lam, z = zs, x, v, epsilon, link.mean, link.precision)$coeff
+                    est <- EMrun_bet(kap, lam, z = zs, x, v, link.mean, link.precision, em_controls, optim_method, optim_controls)$coeff
                     kapsim <- est[1:nkap]
                     lamsim <- est[-(1:nkap)]
                     quantile_residual_bet(kapsim, lamsim, zs, x, v, link.mean, link.precision)
@@ -487,15 +498,18 @@ envelope_bet <- function(residual, kap, lam, x, v, nsim_env, prob, n, epsilon, l
 #' @param v matrix containing the covariates for the precision submodel. Each column is a different covariate.
 #' @param ntest number of observations in the test set for prediction.
 #' @param predict number of partitions (training and test sets) to be evaluated.
-#' @param epsilon tolerance parameter used in the Expectation-Maximization algorithm for the training data set.
 #' @param link.mean a string containing the link function for the mean.
 #' The possible link functions for the mean are "logit","probit", "cauchit", "cloglog".
 #' @param link.precision a string containing the link function the precision parameter.
 #' The possible link functions for the precision parameter are "identity", "log", "sqrt".
+#' @param em_controls a list containing two elements: \code{maxit} that contains the maximum number of iterations of the EM algorithm; 
+#' \code{em_tol} that defines the tolerance value to control the convergence criterion in the EM-algorithm.
+#' @param optim_method main optimization algorithm to be used. The available methods are the same as those of \code{optim} function.
+#' @param optim_controls a list of control arguments to be passed to the \code{optim} function in the optimization of the model. For the control options, see
+#' @return Vector containing the RSS for each partition of the full data set.
 #' @seealso
 #' \code{\link{score_residual_bet}}, \code{\link{quantile_residual_bet}}, \code{\link{envelope_bet}}
-#' @return Vector containing the RSS for each partition of the full data set.
-pred_accuracy_bet <- function(residual, kap, lam, z, x, v, ntest, predict, epsilon, link.mean, link.precision) {
+pred_accuracy_bet <- function(residual, kap, lam, z, x, v, ntest, predict, link.mean, link.precision, em_controls, optim_method, optim_controls) {
   n <- length(z)
   nkap <- ncol(x)
   nlam <- ncol(v)
@@ -513,7 +527,7 @@ pred_accuracy_bet <- function(residual, kap, lam, z, x, v, ntest, predict, epsil
     zte <- z[id_pred]
     xte <- as.matrix(x[id_pred, ])
     vte <- as.matrix(v[id_pred, ])
-    EMtr <- EMrun_bet(kap, lam, ztr, xtr, vtr, epsilon, link.mean, link.precision)
+    EMtr <- EMrun_bet(kap, lam, ztr, xtr, vtr, link.mean, link.precision, em_controls, optim_method, optim_controls)
     kaptr <- EMtr[[1]][1:nkap]
     lamtr <- EMtr[[1]][-(1:nkap)]
     mupred <- link_mean$linkinv(xte %*% kaptr)

@@ -16,13 +16,14 @@ bbreg(
   prob = 0.95,
   predict = 0,
   ptest = 0.25,
-  epsilon = 10^(-5),
-  optim_method = "L-BFGS-B"
+  em_controls = list(maxit = 5000, em_tol = 10^(-5)),
+  optim_method = "L-BFGS-B",
+  optim_controls = list()
 )
 
 bbreg.fit(
-  z,
   x,
+  z,
   v = NULL,
   link.mean = c("logit", "probit", "cauchit", "cloglog"),
   link.precision = c("identity", "log", "sqrt"),
@@ -32,8 +33,9 @@ bbreg.fit(
   prob = 0.95,
   predict = 0,
   ptest = 0.25,
-  epsilon = 10^(-5),
-  optim_method = "L-BFGS-B"
+  em_controls = list(maxit = 5000, em_tol = 10^(-5)),
+  optim_method = "L-BFGS-B",
+  optim_controls = list()
 )
 }
 \arguments{
@@ -69,13 +71,17 @@ The partitions are randomly defined when predict is set as a positive integer.}
 \item{ptest}{proportion of the sample size to be considered in the test set for the \code{RSS_pred} analysis (default = 0.25 = 25\\% of the sample size).
 If predict = 0, ptest is ignored.}
 
-\item{epsilon}{tolerance value to control the convergence criterion in the EM-algorithm (default = 10^(-5)).}
+\item{em_controls}{a list containing two elements: \code{maxit} that contains the maximum number of iterations of the EM algorithm, the default is set to 5000;
+\code{em_tol} that defines the tolerance value to control the convergence criterion in the EM-algorithm, the default is set to 10^(-5).}
 
 \item{optim_method}{main optimization algorithm to be used. The available methods are the same as those of \code{optim} function. The default is set to "L-BFGS-B".}
 
-\item{z}{vector of response variables with length \code{n}. Each coordinate must belong to the standard unit interval (0,1).}
+\item{optim_controls}{a list of control arguments to be passed to the \code{optim} function in the optimization of the model. For the control options, see
+the 'Details' in the help of \code{\link[stats]{optim}} for the possible arguments.}
 
 \item{x}{matrix of covariates with respect to the mean with dimension \code{(n,nkap)}.}
+
+\item{z}{vector of response variables with length \code{n}. Each coordinate must belong to the standard unit interval (0,1).}
 
 \item{v}{matrix of covariates with respect to the precision parameter. The default is \code{NULL}. If not \code{NULL} must be of dimension \code{(n,nlam)}.}
 }
@@ -98,6 +104,7 @@ The objects of classes \code{bbreg} and \code{bbreg_fit} return lists containing
 \item \code{lambda} - vector containing the estimates of the precision-related coefficients;
 \item \code{mu} - estimated means;
 \item \code{fitted.values} - the fitted values in the response scale;
+\item \code{efron.pseudo.r2} - Efron's pseudo R^2: the squared correlation between the response variables and the predicted values;
 \item \code{x} - the covariates related to the mean;
 \item \code{v} - the covariates related to the precision parameter;
 \item \code{z} - the response variables;
@@ -134,10 +141,10 @@ The terms "x_i^T" and "v_i^T" represent, respectively, the i-th row of the matri
 
 This package implements an Expectation Maximization (EM) algorithm to fit the bessel regression. The full EM approach proposed in \emph{Barreto-Souza and Simas (2017)} for the beta
 regression is also available here. Fitting the beta regression via EM-algorithm is a major difference between the present package \pkg{bbreg} and the
-well known \code{betareg} created by Alexandre B. Simas and currently maintained by Achim Zeileis. The estimation procedure on the betareg packages
+well known \code{betareg} created by Alexandre B. Simas and currently maintained by Achim Zeileis. The estimation procedure on the \code{betareg} packages
 is given by maximizing the beta model likelihood via \code{\link[stats]{optim}}.
 In terms of initial values, \pkg{bbreg} uses quasi-likelihood estimates as the starting points for
-the EM-algorithms. The formulation of the target model also has the same structure as in the standard functions \code{lm}, \code{glm} and \pkg{betareg},
+the EM-algorithms. The formulation of the target model also has the same structure as in the standard functions \code{lm}, \code{glm} and \code{betareg},
 with also the same structure as the latter when precision covariates are being used. The user is supposed to
 write a formula object describing elements of the regression (response, covariates for the mean submodel,
 covariates for the precision submodel, presence of intercepts, and interactions). As an example, the description
