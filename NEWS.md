@@ -27,15 +27,15 @@
 # bbreg 2.0.1
 
 * Correction on the database SA.
-* Adjust on plot method to allow general graphical arguments.
+* Adjust on plot method to allow additional graphical arguments.
 
 # bbreg 2.0.0
 
 * Several 'for' loops were rewritten in vectorized form.
 * Several S3 methods implemented.
-* functions 'bbsummary' and 'eplot' deprecated.
-* vignette written.
-* github repository created.
-* several improvements on the outputs.
-* initial guesses modified.
+* Functions 'bbsummary' and 'eplot' deprecated.
+* Vignette written.
+* Github repository created.
+* Several improvements on the outputs.
+* Initial guesses modified.
 
