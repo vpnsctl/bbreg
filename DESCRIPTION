@@ -4,22 +4,22 @@ Title: Bessel and Beta Regressions via Expectation-Maximization
         Algorithm for Continuous Bounded Data
 Version: 2.0.5
 Authors@R: 
-    c(person(given = "Vinicius",
-             family = "Mayrink",
-             role = c("cre", "aut"),
-             email = "vdinizm@gmail.com",
-             comment = c(ORCID = "0000-0002-5683-8326")),
-      person(given = "Alexandre B.",
+    c(person(given = "Alexandre B.",
              family = "Simas",
-             role = "aut",
+             role = c("aut", "cre"),
              email = "alexandre.impa@gmail.com",
              comment = c(ORCID = "0000-0003-2562-2829")),
+      person(given = "Vinicius",
+             family = "Mayrink",
+             role = c("aut"),
+             email = "vdinizm@gmail.com",
+             comment = c(ORCID = "0000-0002-5683-8326")),
       person(given = "Wagner",
              family = "Barreto-Souza",
              role = "aut",
              email = "wagnerbs85@gmail.com",
              comment = c(ORCID = "0000-0003-0831-7881")))
-Maintainer: Vinicius Mayrink <vdinizm@gmail.com>
+Maintainer: Alexandre B. Simas <alexandre.impa@gmail.com>
 Description: Functions to fit, via Expectation-Maximization (EM) algorithm, the Bessel and Beta regressions to a data set with a bounded continuous response variable. The Bessel regression is a new and robust approach proposed in the literature. The EM version for the well known Beta regression is another major contribution of this package. See the reference Barreto-Souza, Mayrink and Simas (2020) <arXiv:2003.05157> for details.  
 Depends: R (>= 3.5.0)
 License: GPL-2 | file LICENSE
