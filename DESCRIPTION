@@ -4,16 +4,16 @@ Title: Bessel and Beta Regressions via Expectation-Maximization
         Algorithm for Continuous Bounded Data
 Version: 2.0.5
 Authors@R: 
-    c(person(given = "Alexandre B.",
-             family = "Simas",
-             role = c("aut", "cre"),
-             email = "alexandre.impa@gmail.com",
-             comment = c(ORCID = "0000-0003-2562-2829")),
-      person(given = "Vinicius",
+    c(person(given = "Vinicius",
              family = "Mayrink",
              role = c("aut"),
              email = "vdinizm@gmail.com",
              comment = c(ORCID = "0000-0002-5683-8326")),
+      person(given = "Alexandre B.",
+             family = "Simas",
+             role = c("aut", "cre"),
+             email = "alexandre.impa@gmail.com",
+             comment = c(ORCID = "0000-0003-2562-2829")),
       person(given = "Wagner",
              family = "Barreto-Souza",
              role = "aut",
