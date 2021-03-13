@@ -39,4 +39,5 @@
 * Github repository created.
 * Several improvements on the outputs.
 * Initial guesses modified.
+* Version 1.0.0 written by Vinicius Mayrink, from version 2.0.0 on, all the code modifications, additions, etc., were written by Alexandre B. Simas.
 
